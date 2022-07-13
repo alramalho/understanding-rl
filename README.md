@@ -18,15 +18,16 @@ It is supposed to be
 - solve cartpole with Actor Critic (current stabilizing around 100 reward)
 
 # TODO - level 1
-- unit tests to verify all algos work
-- add logging (tensorboard)
 - Add at least 2 environments per algorithm
+- vectorized environments
 
 # TODO - level 2
 - separate plotting from main execution (write to intermidiary csv)
-- Allow for video saving
+- unit tests to verify all algos work
+- add logging (tensorboard)
 
 # TODO - level 3
+- Allow for video saving
 - Add Atari onto DQN
 
 

@@ -6,11 +6,12 @@ import numpy as np
 from utils import plot_rwrds_and_aclosses
 
 config = {
-    "num_episodes": 2000,
+    "num_episodes": 500,
     "max_steps": 501,
-    "alpha": 3e-5,
-    "beta": 3e-5,
+    "alpha": 1e-4,
+    "beta": 1e-4,
     "gamma": 0.9,
+    "print_freq": 20,
 }
 
 
@@ -21,14 +22,14 @@ class Brain(nn.Module):
         self.n_states = n_states
         self.n_actions = n_actions
         self.actor = nn.Sequential(
-            nn.Linear(n_states, 128), nn.ReLU(),
-            nn.Linear(128, 128), nn.ReLU(),
-            nn.Linear(128, n_actions),
+            nn.Linear(n_states, 256), nn.ReLU(),
+            nn.Linear(256, 256), nn.ReLU(),
+            nn.Linear(256, n_actions),
         )
         self.critic = nn.Sequential(
-            nn.Linear(n_states, 128), nn.ReLU(),
-            nn.Linear(128, 128), nn.ReLU(),
-            nn.Linear(128, 1),
+            nn.Linear(n_states, 256), nn.ReLU(),
+            nn.Linear(256, 256), nn.ReLU(),
+            nn.Linear(256, 1),
         )
 
     def value(self, states):
@@ -118,9 +119,10 @@ def main():
         c_losses.append(c_loss)
         ac_losses.append(ac_loss)
 
-        if episode % 10 == 0:
-            ac_loss = round(float(ac_loss), 2)
-            print("Episode {} \t Reward {} \t Actor Critic Loss {}".format(episode, reward, ac_loss))
+        if episode % config["print_freq"] == 0:
+            r = np.mean(rewards[-config["print_freq"]:])
+            al = round(float(np.mean(ac_losses[-config["print_freq"]:])), 2)
+            print("Episode {} \t Avg Reward {} \t Actor Critic Loss {}".format(episode, r, al))
 
     plot_rwrds_and_aclosses(rewards, a_losses, c_losses, ac_losses, roll=50)
 
