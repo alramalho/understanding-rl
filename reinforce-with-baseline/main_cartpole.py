@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 from utils import plot_rwrds_and_losses
 import gym
 import numpy as np
-from agent import A2CAgent
+from agent import ReinforceWithBaselineAgent
 
 main_config = {
     "num_episodes": 1000,
@@ -25,7 +25,7 @@ def main():
     input_dim = env.observation_space.shape[0]
     output_dim = env.action_space.n
 
-    agent = A2CAgent(env, input_dim, output_dim, config)
+    agent = ReinforceWithBaselineAgent(env, input_dim, output_dim, config)
 
     rewards = []
     losses = []
@@ -44,7 +44,7 @@ def main():
             )
 
     plot_rwrds_and_losses(rewards, losses=losses, config=config, roll=100)
-    plt.show()
+
 
 
 if __name__ == '__main__':

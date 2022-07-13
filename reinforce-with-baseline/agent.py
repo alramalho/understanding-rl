@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
-from utils import compute_returns
+from utils import compute_returns_for_one_episode
 
 
 class Brain(nn.Module):
@@ -25,7 +25,7 @@ class Brain(nn.Module):
         return F.softmax(v(states))
 
 
-class A2CAgent:
+class ReinforceWithBaselineAgent:
 
     def __init__(self, env, input_dim, output_dim, config):
         self.env = env
@@ -40,7 +40,7 @@ class A2CAgent:
         # torch data treatment
         actions = actions.view(len(actions), 1)
 
-        returns = compute_returns(rewards, self.config["gamma"])
+        returns = compute_returns_for_one_episode(rewards, self.config["gamma"])
 
         advantage = returns - self.brain.value(states)  # must be shape n_steps x 1
         a_log_probs = torch.log(self.brain.action_probs(states)).gather(1, actions)  # must be shape n_steps x 1
