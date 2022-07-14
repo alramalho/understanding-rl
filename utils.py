@@ -98,6 +98,7 @@ class SimpleBuffer:
     def __init__(self):
         self.actions = []
         self.states = []
+        self.next_states = []
         self.logprobs = []
         self.rewards = []
         self.dones = []
@@ -105,6 +106,7 @@ class SimpleBuffer:
     def clear(self):
         del self.actions[:]
         del self.states[:]
+        del self.next_states[:]
         del self.logprobs[:]
         del self.rewards[:]
         del self.dones[:]

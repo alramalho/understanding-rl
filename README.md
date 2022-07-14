@@ -19,12 +19,14 @@ It is supposed to be
 
 # TODO - level 1
 - Add at least 2 environments per algorithm
-- vectorized environments
+- `test` functions
+- consistent signature across all algorithms
 
 # TODO - level 2
 - separate plotting from main execution (write to intermidiary csv)
 - unit tests to verify all algos work
 - add logging (tensorboard)
+- vectorized environments
 
 # TODO - level 3
 - Allow for video saving
@@ -34,3 +36,4 @@ It is supposed to be
 
 # other improvements
 - Create `Environment` class with `run_episode` code
+- Convert n step actor critic to latex instead of code (also not to be copy paste from other source)
