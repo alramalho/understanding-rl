@@ -212,7 +212,14 @@ def main():
         if episode % config["print_freq"] == 0:
             print(f'\nEpisode {episode} got reward {reward}, actor loss {a_loss}, critic loss {c_loss}', end=' ')
 
-    plot_rwrds_and_aclosses(total_rewards, a_losses, c_losses, ac_losses=None, config=config, roll=100)
+    plot_rwrds_and_aclosses(
+        total_rewards,
+        a_losses,
+        c_losses,
+        ac_losses=None,
+        config=dict(config, **{"agent": type(agent).__name__}),
+        roll=100
+    )
 
 
 if __name__ == '__main__':

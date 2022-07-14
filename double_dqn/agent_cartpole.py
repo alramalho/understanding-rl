@@ -179,7 +179,12 @@ def main():
             e = round(epsilon, 2)
             print("Episode {}, Average Reward {}, Average Loss: {}, Epsilon {}".format(episode, r, l, e))
 
-    plot_rwrds_and_losses(rewards=ep_rewards, losses=losses, config=config, roll=30)
+    plot_rwrds_and_losses(
+        rewards=ep_rewards,
+        losses=losses,
+        config=dict(config, **{"agent": type(agent).__name__}),
+        roll=30
+    )
 
 
 if __name__ == "__main__":

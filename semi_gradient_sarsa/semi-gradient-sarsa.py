@@ -113,7 +113,12 @@ def train_agent():
         if episode % 100 == 0:
             print('Episode {} \t\t Avg Reward {} \t\t Avg loss {}'.format(episode, np.mean(ep_rewards[-100:]), losses))
 
-    plot_rwrds_and_losses(ep_rewards, losses=None, config=config, roll=100)
+    plot_rwrds_and_losses(
+        rewards=ep_rewards,
+        losses=None,
+        config=dict(config, **{"agent": type(agent).__name__}),
+        roll=100
+    )
 
 
 if __name__ == "__main__":
