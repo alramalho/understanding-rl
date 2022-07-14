@@ -1,15 +1,11 @@
-# Minimal RL Algorithms
+# Minimal Pytorch RL Algorithms
 
 ----
-# Why?
 
-This repo was built to try and give a clear and non-overwhelming algorithmic practical view
-to the unprofessional reinforcement learning practictioner.  
-I found the need for it while trying to 
-This repo was built with learning and readability in mind. It uses simple OOP principles for 
-reponsibility segreggation and the minimal pytorch weird ass vector manipulations possible.
-
-It is supposed to be
+Goals of the repo:
+- Providing bridge between readable pseudocode and pytorch implementation to the inexperienced user
+  - There lots of great minimal repos ([like this one](https://github.com/seungeunrho/minimalRL)) already. If you just want
+- Familiarize myself with implementing algorithms
 
 # TODO - level 0
 
@@ -19,6 +15,7 @@ It is supposed to be
 
 # TODO - level 1
 - Add at least 2 environments per algorithm
+- unify all `train.py`
 - `test` functions
 - consistent signature across all algorithms
 
