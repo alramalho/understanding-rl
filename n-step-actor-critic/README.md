@@ -1,5 +1,12 @@
 # One step advantage actor Critic
 
+`agent` provides an agent only for discrete environments. \
+An experiment is being done under `experiment.py` where AC is trying to be used in continuous environments using
+`MultivariateNormal` dist instead of `Categorical` (similar to PPO)
+
+## TODO
+- finish experiment. If it is impossible document here why.
+
 ## pseudocode
 ```
 # INITIALISE EXPERIMENT

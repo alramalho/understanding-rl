@@ -22,6 +22,9 @@ class Brain(nn.Module):
             nn.Linear(64, action_dim),
         )
 
+        if self.config["has_continuous_actions"]:
+            self.action_std = self.config["action_std"]
+
         self.critic = nn.Sequential(
             nn.Linear(state_dim, 64),
             nn.Tanh(),
@@ -41,11 +44,30 @@ class Brain(nn.Module):
         c_loss.backward()
         self.optimizer.step()
 
-    def get_action_dist(self, states):
-        a_probs = F.softmax(self.actor(states))
-        dist = Categorical(a_probs)
+    def get_action_dist(self, states, single=True):
+        if self.config["has_continuous_actions"]:
+            a_mean = self.actor(states)
+            a_variance = torch.full((self.action_dim,), self.action_std ** 2)
+            a_variance = a_variance.expand_as(a_mean)
 
-        return dist
+            if single:
+                cov_mat = torch.diag(a_variance).unsqueeze(0)
+            else:
+                cov_mat = torch.diag_embed(a_variance)
+
+            dist = MultivariateNormal(a_mean, cov_mat)
+        else:
+            a_probs = F.softmax(self.actor(states))
+            dist = Categorical(a_probs)
+
+        return dist, dist.entropy()
+
+    def decay_action_std(self):
+        if self.config["has_continuous_actions"]:
+            self.action_std = round(
+                min(self.config["min_action_std"], self.action_std * self.config["action_std_decay_freq"]), 4)
+        else:
+            raise ValueError("This function shouldn't be called")
 
 
 class NStepActorCriticAgent:
@@ -64,11 +86,11 @@ class NStepActorCriticAgent:
         self.brain.decay_action_std()
 
     def get_action_probs(self, states, actions):
-        dist = self.brain.get_action_dist(states)
+        dist, _ = self.brain.get_action_dist(states)
         return dist.log_prob(actions)
 
     def get_action(self, state):
-        dist = self.brain.get_action_dist(state.unsqueeze(0))
+        dist, _ = self.brain.get_action_dist(state.unsqueeze(0), single=True)
 
         a = dist.sample()
         a_log_prob = dist.log_prob(a)
@@ -99,9 +121,11 @@ class NStepActorCriticAgent:
         states = torch.tensor(self.buffer.states).float()
         rewards = torch.tensor(self.buffer.rewards).float()
         actions = torch.tensor(self.buffer.actions).float()
+        if self.config["has_continuous_actions"]:
+            actions = actions.view(-1, self.action_dim)
 
         returns = self.compute_n_step_returns(states, rewards, self.config["gamma"])
-        dist = self.brain.get_action_dist(states)
+        dist, dist_entropy = self.brain.get_action_dist(states)
         log_probs = dist.log_prob(actions)
         state_values = self.brain.critic(states).squeeze()
         advantage = returns - state_values
@@ -120,8 +144,12 @@ class NStepActorCriticAgent:
 
         for step in range(self.config["max_steps"]):
             a, a_log_prob = self.get_action(torch.FloatTensor(s))
+            if not self.config["has_continuous_actions"]:
+                a = a.item()
+            else:
+                a = a.numpy().reshape((self.action_dim,))
 
-            s_, r, done, info = self.env.step(a.item())
+            s_, r, done, info = self.env.step(a)
 
             self.buffer.states.append(s)
             self.buffer.rewards.append(r)
