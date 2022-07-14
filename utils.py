@@ -94,7 +94,7 @@ class Bcolors:
     UNDERLINE = '\033[4m'
 
 
-class RolloutBuffer:
+class SimpleBuffer:
     def __init__(self):
         self.actions = []
         self.states = []

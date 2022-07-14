@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions import Categorical, MultivariateNormal
-from utils import compute_returns_for_several_episodes, RolloutBuffer
+from utils import compute_returns_for_several_episodes, SimpleBuffer
 import numpy as np
 
 
@@ -74,7 +74,7 @@ class PPOAgent:
         self.env = env
         self.state_dim = state_dim
         self.action_dim = action_dim
-        self.buffer = RolloutBuffer()
+        self.buffer = SimpleBuffer()
         self.brain = Brain(state_dim, action_dim, config)
         self.config = config
 
@@ -121,7 +121,7 @@ class PPOAgent:
 
             c_loss = self.mse_loss(state_values, returns)
 
-            loss = (a_loss + 0.5 * c_loss - self.config["entropy_reg"] * dist_entropy).mean()
+            loss = (a_loss + 0.5 * c_loss + self.config["entropy_reg"] * dist_entropy).mean()
 
             self.brain.update(loss)
             losses.append(loss.detach().numpy())
@@ -137,6 +137,8 @@ class PPOAgent:
             a, a_log_prob = self.get_action(torch.FloatTensor(s))
             if not self.config["has_continuous_actions"]:
                 a = a.item()
+            else:
+                a = a.numpy().reshape((self.action_dim,))
 
             s_, r, done, info = self.env.step(a)
 

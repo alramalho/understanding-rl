@@ -40,8 +40,9 @@ def train(config):
         if episode % config["entropy_decay_freq"] == 0:
             entropy_reg = 0.9 * entropy_reg
 
-        if episode % config["action_std_decay_freq"] == 0:
-            agent.decay_action_std()
+        if config["has_continuous_actions"]:
+            if episode % config["action_std_decay_freq"] == 0:
+                agent.decay_action_std()
 
         if episode % config["print_freq"] == 0:
             r = round(float(np.mean(ep_rewards[-config["print_freq"]:])), 2)
@@ -49,7 +50,7 @@ def train(config):
             l = round(float(np.mean(losses[-loss_freq:])), 2)
             print("Episode {}, Average Reward {}, Average Loss: {}".format(episode, r, l))
 
-    plot_rwrds_and_losses(ep_rewards, losses, config)
+    plot_rwrds_and_losses(ep_rewards, losses, config=dict(config, **{"agent": type(agent).__name__}))
 
 
 if __name__ == "__main__":
