@@ -3,7 +3,9 @@
 ----
 
 Goals of the repo:
-- Providing bridge between readable pseudocode and pytorch implementation to the inexperienced user
+- Demystify RL algorithms by providing minimal code implementations and it's accompanying pseudocode
+- Serve as support for (insert article URL here)
+- Make implementations easy to extend and experiment (via logging, plotting, and hyperparameter tyning)
 - Practice implementing algorithms 
 
 Disclaimers:
@@ -23,19 +25,30 @@ Disclaimers:
 - unify all `train.py`
 - `test` functions (take a look at `rl-baselines3-zoo/tests`)
 - consistent signature across all algorithms
+- Add Atari onto DQN
 
 # TODO - level 2
-- separate plotting from main execution (write to intermidiary csv)
-- unit tests to verify all algos work
-- add logging (tensorboard)
-- vectorized environments. (Check `stable_baselines3/common/vec_env`)
+- add logging 
+  - To csv
+- explain folder structure
+- separate plotting from main execution (use intermidiary csv)
 
 # TODO - level 3
+- vectorized environments. (Check `stable_baselines3/common/vec_env`)
+- unit tests to verify all algos work
 - Allow for video saving
-- Add Atari onto DQN
 
 
 
 # other improvements
 - Create `Environment` class with `run_episode` code
 - Convert n step actor critic to latex instead of code (also not to be copy paste from other source)
+
+
+# troubleshooting
+
+- In case you run into ROM license troubles, run
+```
+pip install "gym[atari,accept-rom-license]"
+```
+Be aware that this accepts the ROM license for you.

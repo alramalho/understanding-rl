@@ -30,6 +30,28 @@ class ReplayBuffer:
         return len(self.mem)
 
 
+class DQNConv(nn.Module):
+    def __init__(self, state_dim, action_dim):
+        super(DQNConv, self).__init__()
+
+        self.conv = nn.Sequential(
+            nn.Conv2d(in_channels=state_dim, out_channels=16, kernel_size=8, stride=4),
+            nn.ReLU(),
+            nn.Conv2d(in_channels=16, out_channels=32, kernel_size=4, stride=2),
+            nn.ReLU()
+        )
+
+        self.fc = nn.Sequential(
+            nn.Linear(in_features=32 * 9 * 9, out_features=256),
+            nn.ReLU(),
+            nn.Linear(in_features=256, out_features=action_dim)
+        )
+
+    def forward(self, x):
+        conv_out = self.conv(x).view(x.size()[0], -1)  # convert to 2D
+        return self.fc(conv_out)
+
+
 class Brain(nn.Module):
     def __init__(self, state_dim, action_dim, config):
         super(Brain, self).__init__()
@@ -37,31 +59,39 @@ class Brain(nn.Module):
         self.action_dim = action_dim
         self.config = config
 
-        self.q_net = nn.Sequential(
-            nn.Linear(state_dim, 32), nn.ReLU(),
-            nn.Linear(32, 32), nn.ReLU(),
-            nn.Linear(32, action_dim)
-        )
+        if config["net_arch"] in ["mlp_small", "mlp_medium"]:
+            hidden_layer_size = 64 if config["net_arch"] == "mlp_small" else 256
 
-        self.q_target = nn.Sequential(
-            nn.Linear(state_dim, 32), nn.ReLU(),
-            nn.Linear(32, 32), nn.ReLU(),
-            nn.Linear(32, action_dim)
-        )
+            self.q_net = nn.Sequential(
+                nn.Linear(state_dim, hidden_layer_size), nn.ReLU(),
+                nn.Linear(hidden_layer_size, hidden_layer_size), nn.ReLU(),
+                nn.Linear(hidden_layer_size, action_dim)
+            )
+
+            self.q_target = nn.Sequential(
+                nn.Linear(state_dim, hidden_layer_size), nn.ReLU(),
+                nn.Linear(hidden_layer_size, hidden_layer_size), nn.ReLU(),
+                nn.Linear(hidden_layer_size, action_dim)
+            )
+        elif config["net_arch"] == "conv":
+            self.q_net = DQNConv(state_dim, action_dim)
+            self.q_target = DQNConv(state_dim, action_dim)
+        else:
+            raise ValueError("Invalid net_arch")
 
         self.optimizer = torch.optim.RMSprop(self.q_net.parameters(), lr=self.config["learning_rate"])
 
-    def target_qvalue(self, states, single=False):
-        if single:
+    def target_qvalue(self, states):
+        if len(states.shape) == 1:  # Pytorch doesn't accept single inputs
             states = states.unsqueeze(0)
         return self.q_target(states)
 
-    def qvalue(self, states, single=False):
-        if single:
+    def qvalue(self, states):
+        if len(states.shape) == 1:  # Pytorch doesn't accept single inputs
             states = states.unsqueeze(0)
         return self.q_net(states)
 
-    def transfer_weights(self, soft=False):
+    def transfer_weights(self):
         params = self.q_net.parameters()
         target_params = self.q_target.parameters()
         for param, target_param in zip(params, target_params):
@@ -84,14 +114,22 @@ class DoubleDQNAgent:
         self.training_step = 0
         self.brain = Brain(state_dim, action_dim, config)
         self.buffer = ReplayBuffer(self.config["buffer_max_capacity"])
-        self.epsilon = self.config["init_epsilon"]
+        self.epsilon = self.config["initial_epsilon"]
         self.loss_criterion = nn.HuberLoss()
+
+    def decay_epsilon(self):
+        initial = self.config["initial_epsilon"]
+        final = self.config["final_epsilon"]
+        fraction = self.config["exploration_fraction"]
+        n_episodes = self.config["n_episodes"]
+
+        self.epsilon = min(self.epsilon - np.abs(final - initial) / (fraction * n_episodes), final)
 
     def e_greedy_policy(self, state):
         if random.random() < self.epsilon:
             action = random.choice(range(self.action_dim))
         else:
-            action = torch.argmax(self.brain.qvalue(state, single=True).detach())
+            action = torch.argmax(self.brain.qvalue(state).detach())
             action = action.item()
 
         return action
@@ -105,8 +143,7 @@ class DoubleDQNAgent:
             if dones[i]:
                 y[i] = rewards[i]
             else:
-                y[i] = rewards[i] + self.config["gamma"] * torch.max(
-                    self.brain.target_qvalue(next_states[i], True).detach())
+                y[i] = rewards[i] + self.config["gamma"] * torch.max(self.brain.target_qvalue(next_states[i]).detach())
 
         state_action_values = self.brain.qvalue(states).gather(1, actions)
         assert state_action_values.shape == y.shape
@@ -120,8 +157,7 @@ class DoubleDQNAgent:
         losses, acc_reward = [], 0
 
         s = self.env.reset()
-        for step in range(self.config["max_steps"]):
-            self.training_step += 1
+        while True:
             a = self.e_greedy_policy(torch.tensor(s).float())
 
             s_, r, done, _ = self.env.step(a)
@@ -136,12 +172,11 @@ class DoubleDQNAgent:
             if self.training_step % self.config["target_update_interval"] == 0:
                 self.brain.transfer_weights()
 
-            if step % self.config["epsilon_decay_freq"] == 0:
-                self.epsilon = max(self.config["min_epsilon"], 0.95 * self.epsilon)
-
             s = s_
 
             if done:
                 break
 
-        return acc_reward, np.mean(losses)
+        self.decay_epsilon()
+
+        return acc_reward, np.mean(losses), self.epsilon
