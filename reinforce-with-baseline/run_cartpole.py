@@ -17,4 +17,4 @@ config = dict(main_config, **agent_config)
 
 
 if __name__ == '__main__':
-    train()
+    train(config)
