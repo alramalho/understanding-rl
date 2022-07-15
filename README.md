@@ -4,8 +4,10 @@
 
 Goals of the repo:
 - Providing bridge between readable pseudocode and pytorch implementation to the inexperienced user
-  - There lots of great minimal repos ([like this one](https://github.com/seungeunrho/minimalRL)) already. If you just want
-- Familiarize myself with implementing algorithms
+- Practice implementing algorithms 
+
+# TODO - level -1 (debug)
+- Run through `python3 run_<env>` (**FAILING**)
 
 # TODO - level 0
 
@@ -16,7 +18,7 @@ Goals of the repo:
 # TODO - level 1
 - Add at least 2 environments per algorithm
 - unify all `train.py`
-- `test` functions
+- `test` functions (take a look at `rl-baselines3-zoo/tests`)
 - consistent signature across all algorithms
 
 # TODO - level 2

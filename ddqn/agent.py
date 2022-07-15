@@ -1,26 +1,8 @@
 import random
 from collections import deque
-from utils import plot_rwrds_and_losses
-
-import gym
 import numpy as np
 import torch
 from torch import nn
-
-config = {
-    "n_episodes": 2000,
-    "print_freq": 10,
-    "max_steps": 200,
-    "batch_size": 32,
-    "buffer_max_capacity": 100000,
-    "init_epsilon": 0.8,
-    "min_epsilon": 0.01,
-    "epsilon_decay_freq": 50,  # in steps
-    "gamma": 0.99,
-    "learning_rate": 0.00025,
-    "tau": 1000,  # in steps
-}
-epsilon = config["init_epsilon"]
 
 
 class ReplayBuffer:
@@ -37,7 +19,6 @@ class ReplayBuffer:
             next_states.append(s_)
             dones.append(done)
 
-        # actions and states need to have same rows
         return torch.tensor(states).float(), torch.tensor(actions).view(-1, 1), torch.tensor(
             rewards).float(), torch.tensor(
             next_states).float(), torch.tensor(dones).float()
@@ -50,22 +31,25 @@ class ReplayBuffer:
 
 
 class Brain(nn.Module):
-    def __init__(self, state_dim, action_dim):
+    def __init__(self, state_dim, action_dim, config):
         super(Brain, self).__init__()
         self.state_dim = state_dim
         self.action_dim = action_dim
+        self.config = config
 
         self.q_net = nn.Sequential(
-            nn.Linear(state_dim, 256), nn.ReLU(),
-            nn.Linear(256, action_dim)
+            nn.Linear(state_dim, 32), nn.ReLU(),
+            nn.Linear(32, 32), nn.ReLU(),
+            nn.Linear(32, action_dim)
         )
 
         self.q_target = nn.Sequential(
-            nn.Linear(state_dim, 256), nn.ReLU(),
-            nn.Linear(256, action_dim)
+            nn.Linear(state_dim, 32), nn.ReLU(),
+            nn.Linear(32, 32), nn.ReLU(),
+            nn.Linear(32, action_dim)
         )
 
-        self.optimizer = torch.optim.RMSprop(self.q_net.parameters(), lr=config["learning_rate"])
+        self.optimizer = torch.optim.RMSprop(self.q_net.parameters(), lr=self.config["learning_rate"])
 
     def target_qvalue(self, states, single=False):
         if single:
@@ -75,12 +59,14 @@ class Brain(nn.Module):
     def qvalue(self, states, single=False):
         if single:
             states = states.unsqueeze(0)
-
         return self.q_net(states)
 
-    def transfer_weights(self):
-        self.q_target.load_state_dict(self.q_net.state_dict())
-        self.q_target.eval()
+    def transfer_weights(self, soft=False):
+        params = self.q_net.parameters()
+        target_params = self.q_target.parameters()
+        for param, target_param in zip(params, target_params):
+            target_param.data.mul_(1 - self.config["tau"])
+            torch.add(target_param.data, param.data, alpha=self.config["tau"], out=target_param.data)
 
     def update(self, loss):
         self.optimizer.zero_grad()
@@ -89,18 +75,20 @@ class Brain(nn.Module):
 
 
 class DoubleDQNAgent:
-    def __init__(self, env, state_dim, action_dim):
+    def __init__(self, env, state_dim, action_dim, config):
         self.env = env
         self.state_dim = state_dim
         self.action_dim = action_dim
-        self.overall_step = 0
-        self.brain = Brain(state_dim, action_dim)
-        self.buffer = ReplayBuffer(config["buffer_max_capacity"])
+        self.config = config
 
+        self.training_step = 0
+        self.brain = Brain(state_dim, action_dim, config)
+        self.buffer = ReplayBuffer(self.config["buffer_max_capacity"])
+        self.epsilon = self.config["init_epsilon"]
         self.loss_criterion = nn.HuberLoss()
 
     def e_greedy_policy(self, state):
-        if random.random() < epsilon:
+        if random.random() < self.epsilon:
             action = random.choice(range(self.action_dim))
         else:
             action = torch.argmax(self.brain.qvalue(state, single=True).detach())
@@ -109,7 +97,7 @@ class DoubleDQNAgent:
         return action
 
     def train(self):
-        states, actions, rewards, next_states, dones = self.buffer.sample(config["batch_size"])
+        states, actions, rewards, next_states, dones = self.buffer.sample(self.config["batch_size"])
 
         y = torch.zeros((len(states), 1))
 
@@ -117,7 +105,8 @@ class DoubleDQNAgent:
             if dones[i]:
                 y[i] = rewards[i]
             else:
-                y[i] = rewards[i] + config["gamma"] * torch.max(self.brain.target_qvalue(next_states[i], True).detach())
+                y[i] = rewards[i] + self.config["gamma"] * torch.max(
+                    self.brain.target_qvalue(next_states[i], True).detach())
 
         state_action_values = self.brain.qvalue(states).gather(1, actions)
         assert state_action_values.shape == y.shape
@@ -128,12 +117,11 @@ class DoubleDQNAgent:
         return loss.detach().numpy()
 
     def run_episode(self):
-        global epsilon
         losses, acc_reward = [], 0
 
         s = self.env.reset()
-        for step in range(config["max_steps"]):
-            self.overall_step += 1
+        for step in range(self.config["max_steps"]):
+            self.training_step += 1
             a = self.e_greedy_policy(torch.tensor(s).float())
 
             s_, r, done, _ = self.env.step(a)
@@ -141,15 +129,15 @@ class DoubleDQNAgent:
 
             self.buffer.store(tuple=(s, a, r, s_, done))
 
-            if len(self.buffer) >= config["batch_size"]:
+            if len(self.buffer) >= self.config["batch_size"]:
                 loss = self.train()
                 losses.append(loss)
 
-            if self.overall_step % config["tau"] == 0:
+            if self.training_step % self.config["target_update_interval"] == 0:
                 self.brain.transfer_weights()
 
-            if step % config["epsilon_decay_freq"] == 0:
-                epsilon = max(config["min_epsilon"], 0.95 * epsilon)
+            if step % self.config["epsilon_decay_freq"] == 0:
+                self.epsilon = max(self.config["min_epsilon"], 0.95 * self.epsilon)
 
             s = s_
 
@@ -157,35 +145,3 @@ class DoubleDQNAgent:
                 break
 
         return acc_reward, np.mean(losses)
-
-
-def main():
-    ep_rewards, losses = [], []
-
-    env = gym.make("CartPole-v1")
-    input_dim = env.observation_space.shape[0]
-    output_dim = env.action_space.n
-
-    agent = DoubleDQNAgent(env, input_dim, output_dim)
-
-    for episode in range(config["n_episodes"]):
-        reward, loss = agent.run_episode()
-        ep_rewards.append(reward)
-        losses.append(loss)
-
-        if episode % config["print_freq"] == 0:
-            r = round(float(np.mean(ep_rewards[-config["print_freq"]:])), 2)
-            l = round(float(np.mean(losses[-config["print_freq"]:])), 2)
-            e = round(epsilon, 2)
-            print("Episode {}, Average Reward {}, Average Loss: {}, Epsilon {}".format(episode, r, l, e))
-
-    plot_rwrds_and_losses(
-        rewards=ep_rewards,
-        losses=losses,
-        config=dict(config, **{"agent": type(agent).__name__}),
-        roll=30
-    )
-
-
-if __name__ == "__main__":
-    main()
