@@ -6,6 +6,9 @@ Goals of the repo:
 - Providing bridge between readable pseudocode and pytorch implementation to the inexperienced user
 - Practice implementing algorithms 
 
+Disclaimers:
+- It is meant to be fast (run < 5min every algorithm) so some instability due to high learning rates is
+
 # TODO - level -1 (debug)
 - Run through `python3 run_<env>` (**FAILING**)
 
@@ -25,7 +28,7 @@ Goals of the repo:
 - separate plotting from main execution (write to intermidiary csv)
 - unit tests to verify all algos work
 - add logging (tensorboard)
-- vectorized environments
+- vectorized environments. (Check `stable_baselines3/common/vec_env`)
 
 # TODO - level 3
 - Allow for video saving
