@@ -11,7 +11,7 @@ Goals of the repo:
 
 - put pseudocde image into every folder
 - run every algorithm and put some graphs
-- solve cartpole with Actor Critic (current stabilizing around 100 reward)
+- solve cartpole with Actor Critic (current stabilizing around 100 reward) ✅
 
 # TODO - level 1
 - Add at least 2 environments per algorithm
