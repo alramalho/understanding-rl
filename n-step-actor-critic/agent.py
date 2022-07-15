@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.distributions import Categorical, MultivariateNormal
-from utils import compute_returns_for_several_episodes, SimpleBuffer
+from torch.distributions import Categorical
+from utils import SimpleBuffer
 import numpy as np
 
 
@@ -116,9 +116,12 @@ class NStepActorCriticAgent:
 
     def run_episode(self):
         rewards = []
-        s = self.env.reset(seed=self.config["random_seed"])
+        if self.config["random_seed"]:
+            s = self.env.reset(seed=self.config["random_seed"])
+        else:
+            s = self.env.reset()
 
-        for step in range(self.config["max_steps"]):
+        while True:
             a, a_log_prob = self.get_action(torch.FloatTensor(s))
 
             s_, r, done, info = self.env.step(a.item())

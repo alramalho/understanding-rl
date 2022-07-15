@@ -131,7 +131,8 @@ class DDPGAgent:
         self.random_process.reset()
         s = self.env.reset()
 
-        for step in range(self.config["max_steps"]):
+        step = 0
+        while True:
             a = self.random_process.get_action(self.brain.actor.policy(torch.tensor(s).float()).detach().numpy(), step)
 
             s_, r, done, _ = env.step(a)
@@ -147,8 +148,8 @@ class DDPGAgent:
                 c_losses.append(c_loss.detach().numpy())
 
             rewards += r
-
             s = s_
+            step += 1
 
             if done:
                 break

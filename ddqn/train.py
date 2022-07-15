@@ -12,7 +12,6 @@ def train(config):
     env = gym.make(config["problem"])
     if config["random_seed"]:
         torch.manual_seed(config["random_seed"])
-        env.seed(config["random_seed"])
         np.random.seed(config["random_seed"])
 
     input_dim = env.observation_space.shape[0]

@@ -131,9 +131,12 @@ class PPOAgent:
 
     def run_episode(self):
         rewards = []
-        s = self.env.reset(seed=self.config["random_seed"])
+        if self.config["random_seed"]:
+            s = self.env.reset(seed=self.config["random_seed"])
+        else:
+            s = self.env.reset()
 
-        for step in range(self.config["max_steps"]):
+        while True:
             a, a_log_prob = self.get_action(torch.FloatTensor(s))
             if not self.config["has_continuous_actions"]:
                 a = a.item()
