@@ -1,6 +1,4 @@
-from optuna_core import optuna_train, optuna_create, plot
-from core import create, train, plot
-from datetime import datetime
+from run_common import run
 
 execution_config = {
     "problem": "CartPole-v1",
@@ -28,11 +26,6 @@ agent_config = {
 
 }
 
-if __name__ == "__main__":
-    # agent = create(execution_config, agent_config)
-    # now = f"experiment_{datetime.now().strftime('%Hh%M-%Y.%m.%d')}/"
-    # results = train(execution_config, agent, experiment_title=now)
-    # plot(results, agent.config)
 
-    study, objective = optuna_create(execution_config, agent_config)
-    optuna_train(study, objective, n_trials=100)
+if __name__ == "__main__":
+    run(execution_config, agent_config)

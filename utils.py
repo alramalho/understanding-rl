@@ -2,7 +2,16 @@ import matplotlib.pyplot as plt
 import sys
 import numpy as np
 import torch
+import os
 
+def sub_dir_count(path):
+    count = 0
+    for f in os.listdir(path):
+        child = os.path.join(path, f)
+        if os.path.isdir(child):
+            print(child)
+            count += 1
+    return count
 
 def compute_returns_for_one_episode(rewards: torch.tensor, gamma: float):
     if rewards.nelement() == 0: return torch.empty_like(rewards)

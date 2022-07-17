@@ -1,5 +1,4 @@
-from optuna_core import optuna_create, optuna_train
-from core import create, train, plot
+from run_common import run
 
 execution_config = {
     "problem": "PongNoFrameskip-v4",
@@ -27,10 +26,6 @@ agent_config = {
 
 }
 
-if __name__ == "__main__":
-    # agent = create(execution_config, agent_config)
-    # rewards, loss = train(execution_config, agent)
-    # plot_+(results, agent.config)
 
-    study, objective = optuna_create(execution_config, agent_config)
-    optuna_train(study, objective, n_trials=100)
+if __name__ == "__main__":
+    run(execution_config, agent_config)

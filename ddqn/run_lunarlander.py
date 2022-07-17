@@ -1,4 +1,6 @@
-from optuna_core import optuna_train, optuna_create, plot
+from optuna_core import optuna_train, optuna_create
+from core import plot, plot_exp
+from run_common import run
 
 execution_config = {
     "problem": "LunarLander-v2",
@@ -27,9 +29,4 @@ agent_config = {
 }
 
 if __name__ == "__main__":
-    # agent = create(execution_config, agent_config)
-    # results = train(execution_config, agent)
-    # plot(results, agent.config)
-
-    study, objective = optuna_create(execution_config, agent_config)
-    optuna_train(study, objective, n_trials=100)
+    run(execution_config, agent_config)

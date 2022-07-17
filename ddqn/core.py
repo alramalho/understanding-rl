@@ -5,8 +5,8 @@ import gym
 from agent import DoubleDQNAgent
 import numpy as np
 import torch
-from datetime import datetime
-from utils import plot_rwrds_and_losses, Bcolors
+import os
+from utils import plot_rwrds_and_losses, Bcolors, sub_dir_count
 from atari_wrappers import AtariWrapper
 from trainlogger import TrainLogger
 
@@ -30,9 +30,10 @@ def create(execution_config, agent_config):
     return agent
 
 
-def train(execution_config, agent, experiment_title, trial_number=None, is_trial=False):
+def train(execution_config, agent, trial_number=None, is_trial=False):
     # Create Train Logger
-    output = experiment_title
+    output = f"{execution_config['problem']}_{sub_dir_count('/logs') + 1}/"
+
     if is_trial:
         output = output + f"/trial_{trial_number}"
 
@@ -72,3 +73,7 @@ def plot(results_df: pd.DataFrame, config):
         config=config,
         roll=30
     )
+
+def plot_exp(experiment_results_path: str):
+    result_df = pd.read_csv(f"logs/{experiment_results_path}/results.csv")
+    plot(results_df=result_df, config={"file": experiment_results_path})
