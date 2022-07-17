@@ -123,7 +123,7 @@ class DoubleDQNAgent:
         fraction = self.config["exploration_fraction"]
         n_episodes = self.config["n_episodes"]
 
-        self.epsilon = min(self.epsilon - np.abs(final - initial) / (fraction * n_episodes), final)
+        self.epsilon = max(self.epsilon - np.abs(final - initial) / (fraction * n_episodes), final)
 
     def e_greedy_policy(self, state):
         if random.random() < self.epsilon:
@@ -173,6 +173,7 @@ class DoubleDQNAgent:
                 self.brain.transfer_weights()
 
             s = s_
+            self.training_step += 1
 
             if done:
                 break
