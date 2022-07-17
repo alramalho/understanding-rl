@@ -5,12 +5,10 @@ import gym
 from agent import DoubleDQNAgent
 import numpy as np
 import torch
-import json
+from datetime import datetime
 from utils import plot_rwrds_and_losses, Bcolors
 from atari_wrappers import AtariWrapper
-from logger import Logger
-
-logger = Logger()
+from trainlogger import TrainLogger
 
 
 def create(execution_config, agent_config):
@@ -28,12 +26,20 @@ def create(execution_config, agent_config):
     output_dim = env.action_space.n
 
     agent = DoubleDQNAgent(env, input_dim, output_dim, agent_config)
-    logger.log_config(agent, agent_config)
 
     return agent
 
 
-def train(execution_config, agent):
+def train(execution_config, agent, experiment_title, trial_number=None, is_trial=False):
+    # Create Train Logger
+    output = experiment_title
+    if is_trial:
+        output = output + f"/trial_{trial_number}"
+
+    logger = TrainLogger(output=output)
+    logger.log_config(agent, dict(execution_config, **agent.config))
+
+    # Train
     print(f'{Bcolors.OKGREEN}Training{Bcolors.ENDC}')
     try:
         ep_rewards, losses, epsilons = [], [], []
@@ -66,73 +72,3 @@ def plot(results_df: pd.DataFrame, config):
         config=config,
         roll=30
     )
-
-#
-# def optuna_train(config):
-#     class LoggingCallback:
-#         def __init__(self, threshold, trial_number, patience):
-#             self.threshold = threshold
-#             self.trial_number = trial_number
-#             self.patience = patience
-#             self.cb_list = []
-#
-#         def __call__(self, study: optuna.study, frozen_trial: optuna.trial):
-#             study.set_user_attr("previous_best_value", study.best_value)
-#
-#             if frozen_trial.number > self.trial_number:
-#                 previous_best_value = study.user_attrs.get("previous_best_value", None)
-#                 if previous_best_value * study.best_value >= 0:
-#                     if abs(previous_best_value - study.best_value) < self.threshold:
-#                         self.cb_list.append(frozen_trial.number)
-#
-#                         if len(self.cb_list) > self.patience:
-#                             print('The study stops now...')
-#                             print("With number", frozen_trial.number, "and value ", frozen_trial.number)
-#                             print("The prev and curr best values are {} and {}".format(previous_best_value,
-#                                                                                        study.best_value))
-#                             study.stop()
-#
-#     def objective(trial):
-#         env = gym.make(config["problem"])
-#         input_dim = env.observation_space.shape[0]
-#         output_dim = env.action_space.n
-#
-#         trials_config = {
-#             "net_arch": trial.suggest_categorical("net_arch", ["mlp_small", "mlp_medium"]),
-#             "learning_rate": trial.suggest_loguniform("learning_rate", 1e-5, 1),
-#             "exploration_fraction": trial.suggest_uniform("exploration_fraction", 0, 0.5),
-#             "target_update_interval": trial.suggest_categorical("target_update_interval", [10, 100, 200])
-#         }
-#
-#         new_config = dict(config, **trials_config)
-#
-#         agent = DoubleDQNAgent(env, input_dim, output_dim, new_config)
-#         ep_rewards, losses, epsilons = [], [], []
-#
-#         for episode in range(config["n_episodes"]):
-#             reward, loss, epsilon = agent.run_episode()
-#             ep_rewards.append(reward)
-#             losses.append(loss)
-#             epsilons.append(epsilon)
-#
-#             if episode % config["print_freq"] == 0:
-#                 print("########################")
-#                 print(f"Episode {episode} with config ")
-#                 print(json.dumps(trials_config))
-#                 r = round(float(np.mean(ep_rewards[-config["print_freq"]:])), 2)
-#                 l = round(float(np.mean(losses[-config["print_freq"]:])), 2)
-#                 e = round(float(np.mean(epsilons[-config["print_freq"]:])), 2)
-#                 print("Average Reward {}, Average Loss: {}, Average Epsilon {}".format(r, l, e))
-#
-#         return np.mean(ep_rewards[-config["n_episodes"]:])
-#
-#     study = optuna.create_study(
-#         direction="maximize",
-#         sampler=optuna.samplers.TPESampler(seed=42),
-#         pruner=optuna.pruners.MedianPruner(n_warmup_steps=10),
-#     )
-#
-#     logging_callback = LoggingCallback(threshold=1e-5, patience=20, trial_number=20)
-#     study.optimize(objective, n_trials=100, timeout=600, callbacks=[logging_callback])
-#
-#     plot_intermediate_values(study)

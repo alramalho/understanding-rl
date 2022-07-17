@@ -1,14 +1,18 @@
 import sys
 from datetime import datetime
 import pandas as pd
+import os
 
-class Logger(object):
-    def __init__(self):
-        dt_string = datetime.now().strftime("%Hh%M-%Y.%m.%d")
+
+class TrainLogger(object):
+    def __init__(self, output):
         self.terminal = sys.stdout
-        self.log_config_file = open(f"logs/results/experiment_{dt_string}.config", 'w+')
-        self.log_results_csv = open(f"logs/results/experiment_{dt_string}.csv", 'w+')
-        self.log = open(f"logs/stdout/experiment_{dt_string}.txt", 'w+')
+
+        os.makedirs(f"logs/{output}", exist_ok=True)
+        self.log_config_file = open(f"logs/{output}/config.txt", 'w+')
+        self.log_results_csv = open(f"logs/{output}/results.csv", 'w+')
+        self.log = open(f"logs/{output}/log.txt", 'w+')
+
         sys.stdout = self
 
     def write(self, message):
@@ -28,7 +32,7 @@ class Logger(object):
         data = [[k, v] for k, v in config.items()]
         self.log_config_file.write(f"######## {type(agent).__name__} Config #########")
         self.log_config_file.write(pd.DataFrame(data).to_string() + "\n")
-        self.log_config_file.write("#############################################\n\n\n# Results CSV\n")
+        self.log_config_file.write("#############################################\n\n\n")
         self.log_to_results("reward,loss,epsilon\n")
 
     def get_results_df(self) -> pd.DataFrame:

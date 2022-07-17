@@ -1,10 +1,8 @@
 from optuna_core import optuna_train, optuna_create, plot
-from core import create, train, plot
-from datetime import datetime
 
 execution_config = {
-    "problem": "CartPole-v1",
-    "n_episodes": 100,
+    "problem": "LunarLander-v2",
+    "n_episodes": 500,
     "print_freq": 10,
     "max_steps": 500,
     "random_seed": 543,
@@ -30,8 +28,7 @@ agent_config = {
 
 if __name__ == "__main__":
     # agent = create(execution_config, agent_config)
-    # now = f"experiment_{datetime.now().strftime('%Hh%M-%Y.%m.%d')}/"
-    # results = train(execution_config, agent, experiment_title=now)
+    # results = train(execution_config, agent)
     # plot(results, agent.config)
 
     study, objective = optuna_create(execution_config, agent_config)
