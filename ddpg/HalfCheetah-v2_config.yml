@@ -1,0 +1,12 @@
+problem: HalfCheetah-v2
+n_episodes: 100
+has_continuous_space: true
+has_continuous_actions: true
+random_seed: 0
+print_freq: 20
+max_memory: 50000
+batch_size: 128
+gamma: 0.99
+actor_lr: 0.0001
+critic_lr: 0.001
+tau: 0.02

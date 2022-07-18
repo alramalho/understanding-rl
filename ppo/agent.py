@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions import Categorical, MultivariateNormal
-from utils import compute_returns_for_several_episodes, SimpleBuffer
+from _utils.utils import compute_returns_for_several_episodes, SimpleBuffer
 import numpy as np
 
 
@@ -131,10 +131,7 @@ class PPOAgent:
 
     def run_episode(self):
         rewards = []
-        if self.config["random_seed"]:
-            s = self.env.reset(seed=self.config["random_seed"])
-        else:
-            s = self.env.reset()
+        s = self.env.reset()
 
         while True:
             a, a_log_prob = self.get_action(torch.FloatTensor(s))

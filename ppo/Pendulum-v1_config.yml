@@ -1,0 +1,21 @@
+problem: Pendulum-v1
+has_continuous_space: true
+has_continuous_actions: true
+n_episodes: 4000
+print_freq: 50
+random_seed: 543 # 0 means no seed
+ppo_update_freq: 4
+K_epochs: 80
+epsilon: 0.1
+lr_actor: 0.002
+lr_critic: 0.002
+entropy_reg: 0.01
+entropy_decay_freq: 10  # in episodes
+action_std: 0.4
+action_std_decay_rate: 0.05
+min_action_std: 0.1
+action_std_decay_freq: 2500
+gamma: 0.99
+# net_arch: mlp_medium # can be mlp_small, mlp_medium or conv
+learning_rate: 0.004
+entropy_reg: 0.01

@@ -1,0 +1,9 @@
+problem: "CartPole-v1"
+has_continuous_space: true
+has_continuous_actions: false
+print_freq: 20
+random_seed: 0
+n_episodes: 1000
+epsilon: 0.2
+gamma: 0.98
+learning_rate: 0.005

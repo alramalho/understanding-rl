@@ -21,23 +21,21 @@ Disclaimers:
 - solve cartpole with Actor Critic (current stabilizing around 100 reward) ✅
 
 # TODO - level 1
-- Add at least 2 environments per algorithm
-- unify all `train.py`
-- `test` functions (take a look at `rl-baselines3-zoo/tests`)
+- Add at least 2 environments per algorithm ✅
+- unify all `train.py` 
 - consistent signature across all algorithms
 - Add Atari onto DQN
 
 # TODO - level 2
-- add logging 
+- add logging ✅
   - To csv
 - explain folder structure
-- separate plotting from main execution (use intermidiary csv)
+- separate plotting from main execution (use intermidiary csv) ✅
 
 # TODO - level 3
 - vectorized environments. (Check `stable_baselines3/common/vec_env`)
-- unit tests to verify all algos work
+- unit tests to verify all algos work (take a look at `rl-baselines3-zoo/tests`)
 - Allow for video saving
-
 
 
 # other improvements

@@ -3,6 +3,7 @@ import random
 import torch
 import torch.nn as nn
 import numpy as np
+from _utils.utils import OUNoise
 
 
 class Memory:
@@ -100,11 +101,11 @@ class Brain:
 
 
 class DDPGAgent:
-    def __init__(self, env, input_dim, output_dim, random_process, config):
+    def __init__(self, env, input_dim, output_dim, config):
         self.env = env
         self.input_dim = input_dim
         self.output_dim = output_dim
-        self.random_process = random_process
+        self.random_process = OUNoise(env.action_space)
         self.config = config
 
         self.brain = Brain(input_dim, output_dim, config)
@@ -125,7 +126,7 @@ class DDPGAgent:
 
         return a_loss, c_loss
 
-    def run_episode(self, env):
+    def run_episode(self):
         rewards, a_losses, c_losses = 0, [], []
 
         self.random_process.reset()
@@ -135,7 +136,7 @@ class DDPGAgent:
         while True:
             a = self.random_process.get_action(self.brain.actor.policy(torch.tensor(s).float()).detach().numpy(), step)
 
-            s_, r, done, _ = env.step(a)
+            s_, r, done, _ = self.env.step(a)
 
             self.memory.store(s, a, r, s_, done)
 
@@ -154,4 +155,4 @@ class DDPGAgent:
             if done:
                 break
 
-        return rewards, np.mean(a_losses), np.mean(c_losses)
+        return rewards, np.mean(a_losses) + np.mean(c_losses)

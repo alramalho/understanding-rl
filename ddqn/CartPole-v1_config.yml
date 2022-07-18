@@ -1,0 +1,18 @@
+problem: CartPole-v1
+has_continuous_space: true
+has_continuous_actions: false
+n_episodes: 100
+print_freq: 10
+random_seed: 543 # 0 means no seed
+
+# agent
+batch_size: 32
+buffer_max_capacity: 10000
+gamma: 0.99
+net_arch: mlp_medium # can be mlp_small, mlp_medium or conv
+learning_rate: 0.001 
+target_update_interval: 200
+tau: 1
+initial_epsilon: 0.8
+final_epsilon: 0.01
+exploration_fraction: 0.25 # where end is reached e.g 0.1 -> epsilon becomes final after 10% of the training process

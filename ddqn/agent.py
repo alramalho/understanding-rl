@@ -104,7 +104,7 @@ class Brain(nn.Module):
         self.optimizer.step()
 
 
-class DoubleDQNAgent:
+class DDQNAgent:
     def __init__(self, env, state_dim, action_dim, config):
         self.env = env
         self.state_dim = state_dim
@@ -180,4 +180,4 @@ class DoubleDQNAgent:
 
         self.decay_epsilon()
 
-        return acc_reward, np.mean(losses), self.epsilon
+        return acc_reward, np.mean(losses)

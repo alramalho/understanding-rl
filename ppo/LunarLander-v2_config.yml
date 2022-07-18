@@ -1,0 +1,19 @@
+problem: LunarLander-v2
+has_continuous_space: true
+has_continuous_actions: false
+n_episodes: 2000
+print_freq: 20
+random_seed: 543 # 0 means no seed
+ppo_update_freq: 4
+K_epochs: 80
+epsilon: 0.1
+lr_actor: 0.002
+lr_critic: 0.002
+entropy_reg: 0.01
+entropy_decay_freq: 10  # in episodes
+
+# agent
+gamma: 0.99
+# net_arch: mlp_medium # can be mlp_small, mlp_medium or conv
+learning_rate: 0.004
+entropy_reg: 0.01

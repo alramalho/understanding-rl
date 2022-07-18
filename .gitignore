@@ -4,3 +4,4 @@ test.py
 venv/
 .venv
 **/logs/**
+**/.DS_Store

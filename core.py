@@ -1,84 +1,166 @@
 import optuna
 from typing import Callable, Tuple
 import gym
-from utils.plot import plot_rwrds_and_losses
-from agent import DoubleDQNAgent
+from ddqn.agent import DDQNAgent
+from ddpg.agent import DDPGAgent
+from n_step_actor_critic.agent import NStepActorCriticAgent
+from ppo.agent import PPOAgent
+from reinforce_with_baseline.agent import ReinforceWithBaselineAgent
+from semi_gradient_sarsa.agent import SemiGradientSarsaAgent
 import numpy as np
 import torch
-from utils.utils import Bcolors, sub_dir_count
-from utils.atari_wrappers import AtariWrapper
-from utils.logger import create_logger
-import pandas as pd
+from _utils.utils import Bcolors, sub_dir_count
+from _utils.atari_wrappers import AtariWrapper
+from _utils.logger import create_logger
 
-def train_agent(execution_config, agent, experiment_number, trial_number=None, is_trial=False):
-    logger = create_logger(execution_config, agent, experiment_number, trial_number=trial_number, is_trial=is_trial)
+# TRAINING
+
+def train_ppo_agent(algo, agent, config, experiment_number, trial_number=None, is_trial=False):
+    logger = create_logger(algo, agent, config, experiment_number,
+                        trial_number=trial_number, is_trial=is_trial)
+
+
+    entropy_reg = config["entropy_reg"]
+
+    ep_rewards, losses = [], []
+
+    try:
+        for episode in range(1, config["n_episodes"] + 1):
+            reward = agent.run_episode()
+            
+            logger.log_to_results("reward\n")
+            logger.log_to_results(str(round(reward, 2)) + '\n')
+
+            ep_rewards.append(reward)
+
+            if episode % config["ppo_update_freq"] == 0:
+                loss = agent.update()
+                losses.append(loss)
+
+            if episode % config["entropy_decay_freq"] == 0:
+                entropy_reg = 0.9 * entropy_reg
+
+            if config["has_continuous_actions"]:
+                if episode % config["action_std_decay_freq"] == 0:
+                    agent.decay_action_std()
+
+            if episode % config["print_freq"] == 0:
+                r = round(float(np.mean(ep_rewards[-config["print_freq"]:])), 2)
+                loss_freq = int(config["print_freq"] / config["ppo_update_freq"])
+                l = round(float(np.mean(losses[-loss_freq:])), 2)
+                print("Episode {}, Average Reward {}, Average Loss: {}".format(episode, r, l))
+    except KeyboardInterrupt:
+        pass
+
+    return logger.get_results_df()
+        
+
+def train_agent(algo, agent, config, experiment_number, trial_number=None, is_trial=False):
+    logger = create_logger(algo, agent, config, experiment_number,
+                           trial_number=trial_number, is_trial=is_trial)
 
     # Train
-    print(f'{Bcolors.OKGREEN}Training{Bcolors.ENDC}')
     try:
-        ep_rewards, losses, epsilons = [], [], []
-        for episode in range(execution_config["n_episodes"]):
-            reward, loss, epsilon = agent.run_episode()
+        ep_rewards, losses = [], []
+        for episode in range(config["n_episodes"]):
+            reward, loss = agent.run_episode()
 
-            logger.log_to_results(",".join([str(round(reward, 2)), str(round(loss, 2)), str(round(epsilon, 2))]) + '\n')
+            logger.log_to_results("reward,loss,epsilon\n")
+            logger.log_to_results(",".join([str(round(reward, 2)), str(round(loss, 2))]) + '\n')
 
             ep_rewards.append(reward)
             losses.append(loss)
-            epsilons.append(epsilon)
 
-            if episode % execution_config["print_freq"] == 0:
-                r = round(float(np.mean(ep_rewards[-execution_config["print_freq"]:])), 2)
-                l = round(float(np.mean(losses[-execution_config["print_freq"]:])), 2)
-                e = round(float(np.mean(epsilons[-execution_config["print_freq"]:])), 2)
-                print("Episode {}, Average Reward {}, Average Loss: {}, Average Epsilon {}".format(episode, r, l, e))
+            if episode % config["print_freq"] == 0:
+                r = round(
+                    float(np.mean(ep_rewards[-config["print_freq"]:])), 2)
+                l = round(float(np.mean(losses[-config["print_freq"]:])), 2)
+                print("Episode {}, Average Reward {}, Average Loss: {}".format(episode, r, l))
 
     except KeyboardInterrupt:
         pass
 
     return logger.get_results_df()
 
-
-def create_agent(execution_config, agent_config):
-    print(f'{Bcolors.OKGREEN}Creating{Bcolors.ENDC}')
-
-    env = gym.make(execution_config["problem"])
-    if execution_config["problem"] == "PongNoFrameskip-v4":
+def create_env(config):
+    env = gym.make(config["problem"])
+    if config["problem"] == "PongNoFrameskip-v4":
         env = AtariWrapper(env)
 
-    if execution_config["random_seed"]:
-        torch.manual_seed(execution_config["random_seed"])
-        np.random.seed(execution_config["random_seed"])
+    if config["random_seed"]:
+        torch.manual_seed(config["random_seed"])
+        np.random.seed(config["random_seed"])
+        env.seed(config["random_seed"])
 
-    input_dim = env.observation_space.shape[0]
-    output_dim = env.action_space.n
+    if config["has_continuous_actions"]:
+        action_dim = env.action_space.shape[0]
+    else:
+        action_dim = env.action_space.n
 
-    agent = DoubleDQNAgent(env, input_dim, output_dim, agent_config)
+    if config["has_continuous_space"]:
+        space_dim = env.observation_space.shape[0]
+    else:
+        space_dim = env.observation_space.n
 
+    if config["problem"] == "PongNoFrameskip-v4":
+        env = AtariWrapper(env)
+
+    return env, space_dim, action_dim
+
+
+def create_agent(env, input_dim, output_dim, algo, config):
+    if algo == "ddqn":
+        agent = DDQNAgent(env, input_dim, output_dim, config)
+    elif algo == "ddpg":
+        agent = DDPGAgent(env, input_dim, output_dim, config)
+    elif algo == "ppo":
+        agent = PPOAgent(env, input_dim, output_dim, config)
+    elif algo == "n_step_actor_critic":
+        agent = NStepActorCriticAgent(env, input_dim, output_dim, config)
+    elif algo == "reinforce_with_baseline":
+        agent = ReinforceWithBaselineAgent(
+            env, input_dim, output_dim, config)
+    elif algo == "semi_gradient_sarsa":
+        agent = SemiGradientSarsaAgent(env, input_dim, output_dim, config)
+    else:
+        raise ValueError(f"No agent with name {algo}")
     return agent
 
 
-def train(execution_config, agent_config):
-    agent = create_agent(execution_config, agent_config)
-    experiment_number = sub_dir_count(f'/logs/{execution_config["problem"]}')
-    train_agent(execution_config, agent, experiment_number)
+def train(algo, config):
+    env, input_dim, output_dim = create_env(config)
+    agent = create_agent(env, input_dim, output_dim, algo, config)
+    experiment_number = sub_dir_count(f'{algo}/logs/{config["problem"]}')
+    if algo == "ppo":
+        train_ppo_agent(algo, agent, config, experiment_number)
+    else:
+        train_agent(algo, agent, config, experiment_number)
 
 
-def optuna_create(execution_config, agent_config) -> Tuple[optuna.Study, Callable]:
-    experiment_number = sub_dir_count(f'/logs/{execution_config["problem"]}')
+# HYPERPARAMETER TUNING
+
+def optuna_create(algo, config) -> Tuple[optuna.Study, Callable]:
+    experiment_number = sub_dir_count(f'{algo}/logs/{config["problem"]}')
+
     def objective(trial: optuna.Trial):
         trials_config = {
+            # only for ddqn
             # "net_arch": trial.suggest_categorical("net_arch", ["mlp_small", "mlp_medium"]),
+            # only for n step actor critic
+            # "n_steps": trial.suggest_categorical("n_steps", ["10", "50", "100"]),
             "learning_rate": trial.suggest_loguniform("learning_rate", 1e-5, 1),
             "exploration_fraction": trial.suggest_uniform("exploration_fraction", 0, 0.5),
-            "target_update_interval": trial.suggest_categorical("target_update_interval",
-                                                                [10, 100, 200, 500, 1000, 1500])
+            "target_update_interval": trial.suggest_categorical("target_update_interval", [10, 100, 200, 500, 1000])
         }
 
-        agent = create_agent(execution_config, dict(agent_config, **trials_config))
-        results_df = train_agent(execution_config, agent, experiment_number,  is_trial=True, trial_number=trial.number)
+        env, input_dim, output_dim = create_env(config)
+        agent = create_agent(env, input_dim, output_dim, algo,
+                             dict(config, **trials_config))
+        results_df = train_agent(
+            algo, agent, config, experiment_number,  is_trial=True, trial_number=trial.number)
         ep_rewards = results_df["reward"].values.tolist()
 
-        return np.mean(ep_rewards[-execution_config["n_episodes"]:])
+        return np.mean(ep_rewards[-config["n_episodes"]:])
 
     study = optuna.create_study(
         direction="maximize",
@@ -90,32 +172,15 @@ def optuna_create(execution_config, agent_config) -> Tuple[optuna.Study, Callabl
 
 
 def optuna_train(study: optuna.Study, objective: Callable, n_trials):
-    study.optimize(objective, n_trials=n_trials, timeout=600, n_jobs=-1)
+    try:
+        study.optimize(objective, n_trials=n_trials, timeout=600, n_jobs=-1)
+    except KeyboardInterrupt:
+        print("Study Interrupted")
+        pass
+
+    print(f'{Bcolors.OKGREEN}Best Trial was {study.best_trial.number}{Bcolors.ENDC}')
 
 
-def tune(execution_config, agent_config, n_trials=100):
-    study, objective = optuna_create(execution_config, agent_config)
+def tune(algo, config, n_trials):
+    study, objective = optuna_create(algo, config)
     optuna_train(study, objective, n_trials=n_trials)
-
-
-def plot_df(results_df: pd.DataFrame, config):
-    print(f'{Bcolors.OKGREEN}Plotting{Bcolors.ENDC}')
-    plot_rwrds_and_losses(
-        rewards=results_df["reward"].values.tolist(),
-        losses=results_df["loss"].values.tolist(),
-        config=config,
-        roll=30
-    )
-
-
-def plot_exp(experiment_results_path: str):
-    result_df = pd.read_csv(f"{experiment_results_path}/results.csv")
-    plot_df(results_df=result_df, config={"file": experiment_results_path})
-
-
-def plot(problem, exp=None):
-    if exp is None:
-        count = sub_dir_count(f"logs/{problem}/")
-        exp = f"logs/{problem}/experiment_{count}"
-
-    plot_exp(exp)

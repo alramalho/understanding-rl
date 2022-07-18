@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions import Categorical
-from utils.utils import SimpleBuffer
+from _utils.utils import SimpleBuffer
 import numpy as np
 
 
@@ -116,10 +116,7 @@ class NStepActorCriticAgent:
 
     def run_episode(self):
         rewards = []
-        if self.config["random_seed"]:
-            s = self.env.reset(seed=self.config["random_seed"])
-        else:
-            s = self.env.reset()
+        s = self.env.reset()
 
         while True:
             a, a_log_prob = self.get_action(torch.FloatTensor(s))
@@ -138,4 +135,4 @@ class NStepActorCriticAgent:
 
         a_loss, c_loss = self.update()
 
-        return np.sum(rewards), a_loss, c_loss
+        return np.sum(rewards), float(a_loss + c_loss)

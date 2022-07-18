@@ -1,0 +1,11 @@
+problem: "CartPole-v1"
+has_continuous_space: true
+has_continuous_actions: false
+n_episodes: 500
+print_freq: 10
+random_seed: 0
+
+alpha: 0.0004
+beta: 0.0004
+gamma: 0.99
+entropy_reg: 0.1

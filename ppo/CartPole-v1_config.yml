@@ -1,0 +1,16 @@
+problem: CartPole-v1
+has_continuous_space: true
+has_continuous_actions: false
+n_episodes: 100
+print_freq: 50
+random_seed: 543 # 0 means no seed
+ppo_update_freq: 4
+K_epochs: 80
+epsilon: 0.1
+lr_actor: 0.0004
+lr_critic: 0.0004
+entropy_reg: 0.01
+entropy_decay_freq: 10  # in episodes
+# agent
+gamma: 0.99
+# net_arch: mlp_medium # can be mlp_small, mlp_medium or conv
