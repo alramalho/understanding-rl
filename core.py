@@ -14,47 +14,6 @@ from _utils.atari_wrappers import AtariWrapper
 from _utils.logger import create_logger
 
 # TRAINING
-
-def train_ppo_agent(algo, agent, config, experiment_number, trial_number=None, is_trial=False):
-    logger = create_logger(algo, agent, config, experiment_number,
-                        trial_number=trial_number, is_trial=is_trial)
-
-
-    entropy_reg = config["entropy_reg"]
-
-    ep_rewards, losses = [], []
-
-    try:
-        for episode in range(1, config["n_episodes"] + 1):
-            reward = agent.run_episode()
-            
-            logger.log_to_results("reward\n")
-            logger.log_to_results(str(round(reward, 2)) + '\n')
-
-            ep_rewards.append(reward)
-
-            if episode % config["ppo_update_freq"] == 0:
-                loss = agent.update()
-                losses.append(loss)
-
-            if episode % config["entropy_decay_freq"] == 0:
-                entropy_reg = 0.9 * entropy_reg
-
-            if config["has_continuous_actions"]:
-                if episode % config["action_std_decay_freq"] == 0:
-                    agent.decay_action_std()
-
-            if episode % config["print_freq"] == 0:
-                r = round(float(np.mean(ep_rewards[-config["print_freq"]:])), 2)
-                loss_freq = int(config["print_freq"] / config["ppo_update_freq"])
-                l = round(float(np.mean(losses[-loss_freq:])), 2)
-                print("Episode {}, Average Reward {}, Average Loss: {}".format(episode, r, l))
-    except KeyboardInterrupt:
-        pass
-
-    return logger.get_results_df()
-        
-
 def train_agent(algo, agent, config, experiment_number, trial_number=None, is_trial=False):
     logger = create_logger(algo, agent, config, experiment_number,
                            trial_number=trial_number, is_trial=is_trial)
@@ -62,10 +21,10 @@ def train_agent(algo, agent, config, experiment_number, trial_number=None, is_tr
     # Train
     try:
         ep_rewards, losses = [], []
+        logger.log_to_results("reward,loss\n")
         for episode in range(config["n_episodes"]):
             reward, loss = agent.run_episode()
 
-            logger.log_to_results("reward,loss,epsilon\n")
             logger.log_to_results(",".join([str(round(reward, 2)), str(round(loss, 2))]) + '\n')
 
             ep_rewards.append(reward)
@@ -81,6 +40,7 @@ def train_agent(algo, agent, config, experiment_number, trial_number=None, is_tr
         pass
 
     return logger.get_results_df()
+
 
 def create_env(config):
     env = gym.make(config["problem"])
@@ -131,10 +91,7 @@ def train(algo, config):
     env, input_dim, output_dim = create_env(config)
     agent = create_agent(env, input_dim, output_dim, algo, config)
     experiment_number = sub_dir_count(f'{algo}/logs/{config["problem"]}')
-    if algo == "ppo":
-        train_ppo_agent(algo, agent, config, experiment_number)
-    else:
-        train_agent(algo, agent, config, experiment_number)
+    train_agent(algo, agent, config, experiment_number)
 
 
 # HYPERPARAMETER TUNING
@@ -160,7 +117,7 @@ def optuna_create(algo, config) -> Tuple[optuna.Study, Callable]:
             algo, agent, config, experiment_number,  is_trial=True, trial_number=trial.number)
         ep_rewards = results_df["reward"].values.tolist()
 
-        return np.mean(ep_rewards[-config["n_episodes"]:])
+        return np.mean(ep_rewards)
 
     study = optuna.create_study(
         direction="maximize",

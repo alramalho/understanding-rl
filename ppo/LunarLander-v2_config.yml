@@ -10,10 +10,5 @@ epsilon: 0.1
 lr_actor: 0.002
 lr_critic: 0.002
 entropy_reg: 0.01
-entropy_decay_freq: 10  # in episodes
-
-# agent
+entropy_decay_freq: -1  # in episodes, -1 means no entropy decay
 gamma: 0.99
-# net_arch: mlp_medium # can be mlp_small, mlp_medium or conv
-learning_rate: 0.004
-entropy_reg: 0.01

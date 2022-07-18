@@ -30,7 +30,7 @@ if __name__ == '__main__':
         "-o", "--optimize", action="store_true", default=False, help="Run hyperparameters search"
     )
     parser.add_argument(
-        "-p", "--plot", type=str, required=False, nargs='?', const=-1, default=None, help="Plot Rewards and Losses for experiment. Pass experiment name (uses last if absent)"
+        "-p", "--plot", type=str, required=False, nargs='?', const=-1, default=None, help="Plot Rewards and Losses for experiment. Takes experiment name (uses last if absent)"
     )
     parser.add_argument(
         "--n-trials",

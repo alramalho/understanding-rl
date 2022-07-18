@@ -77,6 +77,9 @@ class PPOAgent:
         self.buffer = SimpleBuffer()
         self.brain = Brain(state_dim, action_dim, config)
         self.config = config
+        self.episode_tracker = 0
+        self.last_loss = 0
+        self.entropy_reg = config["entropy_reg"]
 
         self.mse_loss = nn.MSELoss()
 
@@ -121,13 +124,24 @@ class PPOAgent:
 
             c_loss = self.mse_loss(state_values, returns)
 
-            loss = (a_loss + 0.5 * c_loss + self.config["entropy_reg"] * dist_entropy).mean()
+            loss = (a_loss + 0.5 * c_loss + self.entropy_reg * dist_entropy).mean()
 
             self.brain.update(loss)
             losses.append(loss.detach().numpy())
 
         self.buffer.clear()
         return np.mean(losses)
+
+    def episode_checks(self):
+        if self.episode_tracker % self.config["ppo_update_freq"] == 0:
+            self.last_loss = self.update()
+
+        if self.episode_tracker % self.config["entropy_decay_freq"] == 0:
+            self.entropy_reg = 0.9 * self.entropy_reg
+
+        if self.config["has_continuous_actions"]:
+            if self.episode_tracker % self.config["action_std_decay_freq"] == 0:
+                self.decay_action_std()
 
     def run_episode(self):
         rewards = []
@@ -154,4 +168,6 @@ class PPOAgent:
             if done:
                 break
 
-        return np.sum(rewards)
+        self.episode_tracker += 1
+        self.episode_checks()
+        return np.sum(rewards), self.last_loss
