@@ -1,6 +1,6 @@
 import gym
 from agent import ReinforceWithBaselineAgent
-from utils import plot_rwrds_and_losses
+from utils.utils import plot_rwrds_and_losses
 import numpy as np
 
 

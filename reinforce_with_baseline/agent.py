@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
-from utils import compute_returns_for_one_episode
+from utils.utils import compute_returns_for_one_episode
 
 
 class Brain(nn.Module):

@@ -3,7 +3,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import random
-from utils import plot_rwrds_and_losses
+from utils.utils import plot_rwrds_and_losses
 
 config = {
     "num_episodes": 1000,

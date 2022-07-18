@@ -1,7 +1,20 @@
 import sys
-from datetime import datetime
+from utils.utils import sub_dir_count
 import pandas as pd
 import os
+
+
+def create_logger(execution_config, agent, trial_number=None, is_trial=False):
+    # Create Train Logger
+    output = f"{execution_config['problem']}_{sub_dir_count('logs/') + 1}/"
+
+    if is_trial:
+        output = output + f"/trial_{trial_number}"
+
+    logger = TrainLogger(output=output)
+    logger.log_config(agent, dict(execution_config, **agent.config))
+
+    return logger
 
 
 class TrainLogger(object):

@@ -1,6 +1,6 @@
 import gym
 import numpy as np
-from utils import plot_rwrds_and_aclosses
+from utils.utils import plot_rwrds_and_aclosses
 from agent import NStepActorCriticAgent
 import torch
 
