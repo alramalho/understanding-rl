@@ -1,5 +1,5 @@
 <figure>
-  <img src="img.png" style="width: 100%" alt="Minimal Pytorch Reinforcement Learning (RL) algorithms">
+  <img src="_imgs/img.png" style="width: 100%" alt="Minimal Pytorch Reinforcement Learning (RL) algorithms">
 </figure>
 
 ----
