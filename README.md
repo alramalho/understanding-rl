@@ -130,7 +130,7 @@ Would open
 # TODO
 
 - [x] put pseudocde image into every folder
-- [ ] run every algorithm and put some graphs
+- [x] run every algorithm and put some graphs
 - [x] Add at least 2 environments per main algorithm
 - [x] unify all `train.py`
 - [x] consistent signature across all algorithms
