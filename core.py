@@ -1,4 +1,4 @@
-import optuna
+ppoimport optuna
 from typing import Callable, Tuple
 import gym
 from ddqn.agent import DDQNAgent
@@ -12,6 +12,17 @@ import torch
 from _utils.utils import Bcolors, sub_dir_count
 from _utils.atari_wrappers import AtariWrapper
 from _utils.logger import create_logger
+from pathlib import Path
+import shutil
+
+
+def delete_last_experience(algo, env):
+    last_experiment_number = sub_dir_count(f'{algo}/logs/{env}') - 1
+    last_experiment_path = Path(f'{algo}/logs/{env}/experiment_{last_experiment_number}')
+    if last_experiment_path.exists() and last_experiment_path.is_dir():
+        shutil.rmtree(last_experiment_path)
+    print(f'{Bcolors.WARNING}Recursively deleting {last_experiment_path}{Bcolors.ENDC}')
+
 
 # TRAINING
 def train_agent(algo, agent, config, experiment_number, trial_number=None, is_trial=False):
@@ -112,7 +123,7 @@ def optuna_create(algo, config) -> Tuple[optuna.Study, Callable]:
         agent = create_agent(env, input_dim, output_dim, algo,
                              dict(config, **trials_config))
         results_df = train_agent(
-            algo, agent, config, experiment_number,  is_trial=True, trial_number=trial.number)
+            algo, agent, config, experiment_number, is_trial=True, trial_number=trial.number)
         ep_rewards = results_df["reward"].values.tolist()
 
         return np.mean(ep_rewards)

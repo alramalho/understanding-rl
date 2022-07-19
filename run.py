@@ -39,6 +39,9 @@ if __name__ == '__main__':
         type=int,
         default=50,
     )
+    parser.add_argument(
+        "-d", "--delete", action="store_true", default=False, help="Delete last experiment"
+    )
     args = parser.parse_args()
 
     with open(f"{args.algo}/{args.env}_config.yml", "r") as config:
@@ -46,6 +49,8 @@ if __name__ == '__main__':
 
     if args.optimize:
         core.tune(args.algo, config, n_trials=args.n_trials)
+    elif args.delete:
+        core.delete_last_experience(args.algo, args.env)
     elif args.plot is not None:
         if args.plot == -1:
             args.plot = get_last_experiment_name(args.algo, args.env)
