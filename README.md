@@ -115,14 +115,21 @@ Used for plotting losses and rewards
 ```
 python run.py --algo <algo> --env <env> --plot <experiment>
 ```
-Ex: `python run.py --algo ddpg --env Pendulum-v1 --plot experiment_0`
+Ex: `python run.py --algo ppo --env CarPole-v1 --plot experiment_6`
+
+Would open
+<figure>
+  <img src="_imgs/ppo_cartpole_results.png" style="width: 100%" alt="Example Plotting of PPO results in CartPole-v1">
+</figure>
+
+
 
 - `<experiment>` can be ommited and it will use latest experience for specified algorithm and environment.
 
 
 # TODO
 
-- [ ] put pseudocde image into every folder
+- [x] put pseudocde image into every folder
 - [ ] run every algorithm and put some graphs
 - [x] Add at least 2 environments per main algorithm
 - [x] unify all `train.py`
