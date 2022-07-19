@@ -2,40 +2,88 @@
 
 ----
 
-Goals of the repo:
+## Goals of the repo:
 - Demystify RL algorithms by providing minimal code implementations and it's accompanying pseudocode
 - Serve as support for (insert article URL here)
-- Make implementations easy to extend and experiment (via logging, plotting, and hyperparameter tyning)
+- Make implementations easy to extend and experiment (via logging, plotting, and hyperparameter tuning)
 - Practice implementing algorithms 
 
-Disclaimers:
-- It is meant to be fast (run < 5min every algorithm) so some instability due to high learning rates is
+### Disclaimer:
+- These implementations aren't supposed to be used in research, but for full-transparency learning. \
+As so, no testing or saving pre-trained models are provided.
 
-# TODO - level -1 (debug)
-- Run through `python3 run_<env>` (**FAILING**)
+## Usage
 
-# TODO - level 0
+For a complete description run
+```
+pyhton run.py -h
+```
 
-- put pseudocde image into every folder
-- run every algorithm and put some graphs
-- solve cartpole with Actor Critic (current stabilizing around 100 reward) ✅
+### Train
+```
+python run.py --algo dqn --env CartPole-v1
+```
+**Outputs**
+```
+<algorithm>
+  └─<experiment>
+      ├─config.txt >> Contains agent configuration 
+      ├─log.txt >> Stdout output (useful for customization)
+      └─results.csv >> CSV of Rewards and Loss
+```
 
-# TODO - level 1
-- Add at least 2 environments per algorithm ✅
-- unify all `train.py` 
-- consistent signature across all algorithms
-- Add Atari onto DQN
+- Such files begin to be written as soon as the experiment starts. Hence interrupting via `CTRL`+`C` \ 
+will still yield plottable results.
+- You can also delete last experiment by running the same command with `-d` or `--delete` flag
 
-# TODO - level 2
-- add logging ✅
+### Tune / Optimize 
+This is mostly helpful if you plan on adding different environments.
+It uses [optuna](https://optuna.org/) to run several hyperparameter combinations and picks the best.
+```
+python run.py --algo ddpg --env Pendulum-v1 --optimize --n-trials 100
+```
+**Outputs**
+```
+<algorithm>
+  └─<experiment>
+    └─trial_1
+      ├─config.txt >> Contains agent configuration 
+      ├─log.txt >> Stdout output (useful for customization)
+      └─results.csv >> CSV of Rewards and Loss
+    └─trial_2
+      └─...
+    └─...
+    └─trial_<n_trials>
+      └─...
+```
+- You can cancel it with CTRL+C
+
+### Plot
+Used for plotting losses and rewards
+```
+python run.py --algo ddpg --env Pendulum-v1 --plot experiment_0
+```
+- `experiment_0` can be ommited and it will use latest experience for that algorithm, for that environment.
+
+## Usage
+
+# TODO
+- [ ] put pseudocde image into every folder
+- [ ] run every algorithm and put some graphs
+- [x] solve cartpole with Actor Critic (current stabilizing around 100 reward)
+- [x] Add at least 2 environments per main algorithm
+- [x] unify all `train.py`
+- [x] consistent signature across all algorithms
+- [ ] Add Atari onto DQN
+- [x] add logging
   - To csv
-- explain folder structure
-- separate plotting from main execution (use intermidiary csv) ✅
-
-# TODO - level 3
-- vectorized environments. (Check `stable_baselines3/common/vec_env`)
-- unit tests to verify all algos work (take a look at `rl-baselines3-zoo/tests`)
-- Allow for video saving
+- [ ] explain folder structure
+- [x] explain experiment
+- [x] add no test disclaimer
+- [x] separate plotting from main execution (use intermidiary csv)
+- [ ] vectorized environments. (Check `stable_baselines3/common/vec_env`)
+- [ ] unit tests to verify all algos work (take a look at `rl-baselines3-zoo/tests`)
+- [ ] Allow for video saving
 
 
 # other improvements
@@ -45,7 +93,7 @@ Disclaimers:
 
 # troubleshooting
 
-- In case you run into ROM license troubles, run
+- In case you run into ROM license troubles when running `PongNoFrameskip-v4`, run
 ```
 pip install "gym[atari,accept-rom-license]"
 ```

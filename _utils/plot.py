@@ -64,7 +64,6 @@ def plot_rwrds_and_aclosses(rewards, a_losses=None, c_losses=None, ac_losses=Non
     plt.show()
 
 def plot_df(results_df: pd.DataFrame, config):
-    print(f'{Bcolors.OKGREEN}Plotting{Bcolors.ENDC}')
     plot_rwrds_and_losses(
         rewards=results_df["reward"].values.tolist(),
         losses=results_df["loss"].values.tolist(),
@@ -74,7 +73,8 @@ def plot_df(results_df: pd.DataFrame, config):
 
 
 def plot(algo: str, env: str, exp: str):
-    path = f"{algo}/logs/{env}/{exp}"
-    result_df = pd.read_csv(f"{path}/results.csv")
-    plot_df(results_df=result_df, config={"file": path})
+    path = f"{algo}/logs/{env}/{exp}/results.csv"
+    print(f'{Bcolors.OKGREEN}Plotting {path}{Bcolors.ENDC}')
+    result_df = pd.read_csv(f"{path}")
+    plot_df(results_df=result_df, config={"path": path})
 

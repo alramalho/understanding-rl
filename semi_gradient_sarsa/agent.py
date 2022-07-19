@@ -4,6 +4,7 @@ import torch
 import torch.nn as nn
 import random
 
+
 class Brain:
 
     def __init__(self, obs_dim, act_dim, config):
@@ -37,7 +38,7 @@ class SemiGradientSarsaAgent:
         self.env = env
         self.obs_dim = obs_dim
         self.act_dim = act_dim
-        self.config= config
+        self.config = config
         self.epsilon = config["epsilon"]
 
         self.brain = Brain(obs_dim, act_dim, config)
@@ -50,12 +51,10 @@ class SemiGradientSarsaAgent:
             action = torch.argmax(self.brain.qvalue(state))
         return int(action)
 
-
     def decay_epsilon(self):
         min_eps = 0.05
-        reduction = (self.epsilon - min_eps)/(self.config["n_episodes"] * 0.7)
+        reduction = (self.epsilon - min_eps) / (self.config["n_episodes"] * 0.7)
         self.epsilon = self.epsilon - reduction
-
 
     def run_episode(self):
         s = torch.FloatTensor(self.env.reset())

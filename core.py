@@ -1,4 +1,4 @@
-ppoimport optuna
+import optuna
 from typing import Callable, Tuple
 import gym
 from ddqn.agent import DDQNAgent
@@ -36,7 +36,7 @@ def train_agent(algo, agent, config, experiment_number, trial_number=None, is_tr
         for episode in range(config["n_episodes"]):
             reward, loss = agent.run_episode()
 
-            logger.log_to_results(",".join([str(round(reward, 2)), str(round(loss, 2))]) + '\n')
+            logger.log_to_results(",".join([str(round(reward, 2)), str(round(loss, 6))]) + '\n')
 
             ep_rewards.append(reward)
             losses.append(loss)
