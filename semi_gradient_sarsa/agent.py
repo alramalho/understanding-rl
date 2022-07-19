@@ -71,12 +71,12 @@ class SemiGradientSarsaAgent:
             a_ = self.select_action(s_)
 
             if done:
-                loss = 0.5*(r - self.brain.qvalue(s)[a])**2
+                loss = (r - self.brain.qvalue(s)[a])**2
                 self.brain.update(loss)
                 losses.append(loss.detach().numpy())
                 break
 
-            loss = 0.5 * (r + self.config["gamma"] * self.brain.qvalue(s_)[a_] - self.brain.qvalue(s)[a]) ** 2
+            loss = (r + self.config["gamma"] * self.brain.qvalue(s_)[a_] - self.brain.qvalue(s)[a]) ** 2
             self.brain.update(loss)
             losses.append(loss.detach().numpy())
 

@@ -115,7 +115,7 @@ class DDQNAgent:
         self.brain = Brain(state_dim, action_dim, config)
         self.buffer = ReplayBuffer(self.config["buffer_max_capacity"])
         self.epsilon = self.config["initial_epsilon"]
-        self.loss_criterion = nn.HuberLoss()
+        self.loss_criterion = nn.MSELoss()
 
     def decay_epsilon(self):
         initial = self.config["initial_epsilon"]
