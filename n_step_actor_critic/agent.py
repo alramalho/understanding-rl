@@ -119,9 +119,9 @@ class NStepActorCriticAgent:
         s = self.env.reset()
 
         while True:
-            a, a_log_prob = self.get_action(torch.FloatTensor(s))
+            a, _ = self.get_action(torch.FloatTensor(s))
 
-            s_, r, done, info = self.env.step(a.item())
+            s_, r, done, _ = self.env.step(a.item())
 
             self.buffer.states.append(s)
             self.buffer.rewards.append(r)

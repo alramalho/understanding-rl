@@ -43,3 +43,6 @@ endfor
 
 where 
 ![img.png](../_imgs/ac_helper.png)
+
+
+taken from [here](https://github.com/alex-lindt/Variance-N-Step-Actor-Critic) - don't love it but not in the mood to mess with latex 🤷‍♂️ to draft something fancier
