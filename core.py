@@ -44,8 +44,6 @@ def train_agent(algo, agent, config, experiment_number, trial_number=None, is_tr
 
 def create_env(config):
     env = gym.make(config["problem"])
-    if config["problem"] == "PongNoFrameskip-v4":
-        env = AtariWrapper(env)
 
     if config["random_seed"]:
         torch.manual_seed(config["random_seed"])
