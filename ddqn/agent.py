@@ -33,18 +33,22 @@ class ReplayBuffer:
 class DQNConv(nn.Module):
     def __init__(self, state_dim, action_dim):
         super(DQNConv, self).__init__()
+        self.state_dim = state_dim
+        self.action_dim = action_dim
 
         self.conv = nn.Sequential(
-            nn.Conv2d(in_channels=state_dim, out_channels=16, kernel_size=8, stride=4),
+            nn.Conv2d(state_dim, 32, kernel_size=8, stride=4),  # out.shape 32 x 20 x 20
             nn.ReLU(),
-            nn.Conv2d(in_channels=16, out_channels=32, kernel_size=4, stride=2),
+            nn.Conv2d(32, 64, kernel_size=4, stride=2),  # out.shape 64 x 9 x 9
+            nn.ReLU(),
+            nn.Conv2d(64, 64, kernel_size=3, stride=1),  # out.shape 64 x 7 x7
             nn.ReLU()
         )
 
         self.fc = nn.Sequential(
-            nn.Linear(in_features=32 * 9 * 9, out_features=256),
+            nn.Linear(in_features=64 * 7 * 7, out_features=512),
             nn.ReLU(),
-            nn.Linear(in_features=256, out_features=action_dim)
+            nn.Linear(in_features=512, out_features=action_dim)
         )
 
     def forward(self, x):
