@@ -2,6 +2,7 @@ import sys
 import pandas as pd
 import os
 from copy import copy
+from _utils.utils import Bcolors
 
 
 
@@ -10,7 +11,7 @@ def create_logger(algo, agent, config, experiment_number, trial_number=None, is_
     prob = config['problem']
     output = f"{algo}/logs/{prob}"
     os.makedirs(output, exist_ok=True)
-    output = f"{output}/experiment_{experiment_number}/"
+    output = f"{output}/experiment_{experiment_number}"
     terminal_log_output=None
 
     if is_trial:
@@ -57,5 +58,6 @@ class TrainLogger(object):
         self.log_config_file.write("#############################################\n\n\n")
 
     def get_results_df(self) -> pd.DataFrame:
+        print(f'{Bcolors.OKGREEN}File {self.log_results_csv.name} closed{Bcolors.ENDC}')
         self.log_results_csv.close()
         return pd.read_csv(self.log_results_csv.name)
