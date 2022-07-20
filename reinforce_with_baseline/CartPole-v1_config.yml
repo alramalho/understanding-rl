@@ -1,7 +1,7 @@
 problem: "CartPole-v1"
 has_continuous_space: true
 has_continuous_actions: false
-n_episodes: 500
+n_episodes: 1000
 print_freq: 10
 random_seed: 0
 
