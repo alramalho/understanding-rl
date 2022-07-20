@@ -86,9 +86,10 @@ class NStepActorCriticAgent:
                 if t + n >= T:
                     continue
                 else:
-                    R_t += gamma ** n * rewards[t + n]
                     if n == n_steps:
                         R_t += gamma ** n * self.brain.critic(states[t + n].unsqueeze(0)).data.detach().item()
+                    else:
+                        R_t += gamma ** n * rewards[t + n]
             R.append(R_t)
 
         R = torch.tensor(R)
