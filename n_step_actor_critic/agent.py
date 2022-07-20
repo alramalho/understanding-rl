@@ -35,6 +35,9 @@ class Brain(nn.Module):
             {'params': self.critic.parameters(), 'lr': self.config["learning_rate"]}
         ])
 
+    def value(self, states):
+        return self.critic(states)
+
     def update(self, c_loss, a_loss):
         self.optimizer.zero_grad()
         a_loss.backward()
@@ -87,7 +90,7 @@ class NStepActorCriticAgent:
                     continue
                 else:
                     if n == n_steps:
-                        R_t += gamma ** n * self.brain.critic(states[t + n].unsqueeze(0)).data.detach().item()
+                        R_t += gamma ** n * self.brain.value(states[t + n].unsqueeze(0)).data.detach().item()
                     else:
                         R_t += gamma ** n * rewards[t + n]
             R.append(R_t)
@@ -104,11 +107,11 @@ class NStepActorCriticAgent:
         returns = self.compute_n_step_returns(states, rewards, self.config["gamma"])
         dist = self.brain.get_action_dist(states)
         log_probs = dist.log_prob(actions)
-        state_values = self.brain.critic(states).squeeze()
-        advantage = returns - state_values
+        state_values = self.brain.value(states).squeeze()
+        n_step_td = returns - state_values
 
-        a_loss = (-log_probs * advantage.detach()).mean()
-        c_loss = advantage.pow(2).mean()
+        a_loss = (-log_probs * n_step_td.detach()).mean()
+        c_loss = n_step_td.pow(2).mean()
 
         self.brain.update(a_loss, c_loss)
 
