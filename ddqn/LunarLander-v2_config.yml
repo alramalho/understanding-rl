@@ -1,13 +1,14 @@
-problem: CartPole-v1
+problem: LunarLander-v2
 has_continuous_space: true
 has_continuous_actions: false
-n_episodes: 100
+n_episodes: 500
 print_freq: 10
 random_seed: 543 # 0 means no seed
 
 # agent
 batch_size: 32
 buffer_max_capacity: 100000
+buffer_min: 32
 gamma: 0.99
 net_arch: mlp_medium # can be mlp_small, mlp_medium or conv
 learning_rate: 0.001 

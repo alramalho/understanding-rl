@@ -1,19 +1,20 @@
 <figure>
   <img src="_imgs/img.png" style="width: 100%" alt="Minimal Pytorch Reinforcement Learning (RL) algorithms">
 </figure>
-
 ----
 
 ## Goals of the repo:
 
-- Demystify RL algorithms by providing minimal, object-oriented implementations and it's accompanying pseudocode
+- Demystify RL algorithms by providing minimal, pytorch object-oriented implementations and it's accompanying pseudocode
+  - I also provide quick explanations on typical `Pytorch` tricky manipulations, like `.squeeze()` or `.detach()` (at the end of repo)
 - Serve as support for (insert article URL here)
 - Practice implementing algorithms
 
 ### Features:
-- OOP code for several algorithms, from the basics (Semi Gradient Sarsa) to state of the art (PPO)
-- Understandable and intuitive logger via experience tracking (check usage part)
-- Easy to understand hyperparameter finding (< 40 lines of code for all algorithms)
+- Minimal and Object Oriented code for simple (Semi Gradient Sarsa) and state of the art algorithms (PPO-Clip)
+- Understandable and intuitive logging via experience tracking 
+- Hyperparameter Tuning (in < 40 lines of code for all algorithms)*
+- Intuitive terminal interface (in < 50 lines)
 
 ### Disclaimer:
 
@@ -159,3 +160,14 @@ pip install "gym[atari,accept-rom-license]"
 ```
 
 Be aware that this accepts the ROM license for you.
+
+
+## Pytorch tricks
+- `.squeeze(...)`
+  - This "squeezes" dim=1 of the array. Useful for when you're working with slightly different tensor shapes. Ex: tensor of dims [32,1].squeeze() -> [32,]  
+- `.unsqueeze(...)`
+  - Kind of the reverse of `.squeeze()`, as it adds in one dimension. Ex: tensor of dims [32,].unsqueeze(1) -> [32, 1]
+- `.view(...)`
+  - Like `.unsqueeze()` but you could do weirder manipulations (change several dimensions). Ex tensor of shape [2,2].view(4,1) -> [4,1]
+- `detach()`
+  - Detaches tensor from gradient calculations. Useful when you want to make predicitons, without backpropagating. (Ex: DDQN target network)

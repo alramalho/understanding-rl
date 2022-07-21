@@ -141,15 +141,10 @@ class DDQNAgent:
     def train(self):
         states, actions, rewards, next_states, dones = self.buffer.sample(self.config["batch_size"])
 
-        y = torch.zeros((len(states), 1))
+        y = rewards + (1 - dones) * self.config["gamma"] * torch.max(self.brain.target_qvalue(next_states), dim=1).values.detach()
+        # y = y.view(-1, 1)  # create dim=1
+        state_action_values = self.brain.qvalue(states).gather(1, actions).squeeze()
 
-        for i in range(len(states)):
-            if dones[i]:
-                y[i] = rewards[i]
-            else:
-                y[i] = rewards[i] + self.config["gamma"] * torch.max(self.brain.target_qvalue(next_states[i]).detach())
-
-        state_action_values = self.brain.qvalue(states).gather(1, actions)
         assert state_action_values.shape == y.shape
         loss = self.mse_loss(state_action_values, y)
 
@@ -169,7 +164,7 @@ class DDQNAgent:
 
             self.buffer.store(tuple=(s, a, r, s_, done))
 
-            if len(self.buffer) >= self.config["batch_size"]:
+            if len(self.buffer) >= self.config["buffer_min"]:
                 loss = self.train()
                 losses.append(loss)
 
