@@ -42,12 +42,12 @@ class ReinforceWithBaselineAgent:
 
         returns = compute_returns_for_one_episode(rewards, self.config["gamma"])
 
-        advantage = returns - self.brain.value(states)  # must be shape n_steps x 1
+        delta = returns - self.brain.value(states)  # must be shape n_steps x 1
         a_log_probs = torch.log(self.brain.action_probs(states)).gather(1, actions)  # must be shape n_steps x 1
         gamma_arr = torch.tensor([self.config["gamma"]**t for t in range(len(states))])
 
-        a_loss = (gamma_arr * -a_log_probs * advantage).mean()
-        c_loss = (0.5 * advantage.pow(2)).mean()  # so that the derivative of this is just the advantage fn
+        a_loss = (gamma_arr * -a_log_probs * delta).mean()
+        c_loss = (0.5 * delta.pow(2)).mean()  # so that the derivative of this is just the advantage fn
 
         ac_loss = a_loss + c_loss + self.config["entropy_reg"] * entropy_term
 

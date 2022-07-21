@@ -1,13 +1,13 @@
 <figure>
   <img src="_imgs/img.png" style="width: 100%" alt="Minimal Pytorch Reinforcement Learning (RL) algorithms">
 </figure>
-----
+
 
 ## Goals of the repo:
 
 - Demystify RL algorithms by providing minimal, pytorch object-oriented implementations and it's accompanying pseudocode
   - I also provide quick explanations on typical `Pytorch` tricky manipulations, like `.squeeze()` or `.detach()` (at the end of repo)
-- Serve as support for (insert article URL here)
+- Support my theory notes
 - Practice implementing algorithms
 
 ### Features:
