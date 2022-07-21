@@ -142,7 +142,6 @@ class DDQNAgent:
         states, actions, rewards, next_states, dones = self.buffer.sample(self.config["batch_size"])
 
         y = rewards + (1 - dones) * self.config["gamma"] * torch.max(self.brain.target_qvalue(next_states), dim=1).values.detach()
-        # y = y.view(-1, 1)  # create dim=1
         state_action_values = self.brain.qvalue(states).gather(1, actions).squeeze()
 
         assert state_action_values.shape == y.shape

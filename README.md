@@ -146,10 +146,9 @@ Would open
 - [ ] unit tests to verify all algos work (take a look at `rl-baselines3-zoo/tests`)
 - [ ] Allow for video saving
 
-# other improvements
+### other improvements
 
 - Create `Environment` class with `run_episode` code
-- Convert n step actor critic to latex instead of code (also not to be copy paste from other source)
 
 # troubleshooting
 
@@ -162,7 +161,7 @@ pip install "gym[atari,accept-rom-license]"
 Be aware that this accepts the ROM license for you.
 
 
-## Pytorch tricks
+## `Pytorch` tricks
 - `.squeeze(...)`
   - This "squeezes" dim=1 of the array. Useful for when you're working with slightly different tensor shapes. Ex: tensor of dims [32,1].squeeze() -> [32,]  
 - `.unsqueeze(...)`
