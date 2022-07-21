@@ -122,7 +122,10 @@ Would open
 <figure>
   <img src="_imgs/ppo_cartpole_results.png" style="width: 100%" alt="Example Plotting of PPO results in CartPole-v1">
 </figure>
-
+<figure>
+  <img src="_imgs/ddqn_pong_results.png" style="width: 100%" alt="Example Plotting of DDQN results in Atari Pong">
+</figure>
+![ddqn_pong_results.png](ddqn_pong_results.png)
 
 
 - `<experiment>` can be ommited and it will use latest experience for specified algorithm and environment.
