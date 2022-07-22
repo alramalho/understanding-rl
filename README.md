@@ -13,9 +13,10 @@
 ### Features:
 - [Accompanying theory notes](https://alramalho.notion.site/Understanding-RL-Theory-Notes-e8591990a19e4d31bd841d318cbd6e40) 📕
 - Minimal and Object Oriented code for simple (Semi Gradient Sarsa) and state of the art algorithms (PPO-Clip)
-- Understandable and intuitive logging via experience tracking 
-- Hyperparameter Tuning (in < 40 lines of code for all algorithms)*
-- Intuitive terminal interface (in < 50 lines)
+- Understandable and intuitive **logging** via experience tracking
+- Easy reward and loss **plotting**
+- **Hyperparameter Tuning** (in < 40 lines of code for all algorithms)*
+- Intuitive **terminal interface** (in < 50 lines)
 
 ### Disclaimer:
 

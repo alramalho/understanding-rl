@@ -72,7 +72,7 @@ def create_env(config):
     if config["has_continuous_space"]:
         space_dim = env.observation_space.shape[0]
     else:
-        space_dim = env.observation_space.n
+        space_dim = 1
 
     return env, space_dim, action_dim
 

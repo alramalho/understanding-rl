@@ -68,7 +68,7 @@ class ReinforceWithBaselineAgent:
         ac_losses = []
         entropy_term = 0
         while True:
-            a_dist = self.brain.action_probs(torch.tensor(s).float().reshape(1, -1)).detach().numpy()
+            a_dist = self.brain.action_probs(torch.tensor(s).float().unsqueeze(0)).detach().numpy()
 
             a = np.random.choice(self.output_dim, p=np.squeeze(a_dist))
 
