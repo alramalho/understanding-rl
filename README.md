@@ -5,12 +5,13 @@
 
 ## Goals of the repo:
 
-- Demystify RL algorithms by providing minimal, pytorch object-oriented implementations and it's accompanying pseudocode
+- Demystify RL algorithms by providing minimal, pytorch object-oriented implementations and it's accompanying pseudocode and explanation
   - I also provide quick explanations on typical `Pytorch` tricky manipulations, like `.squeeze()` or `.detach()` (at the end of repo)
 - Support my theory notes
 - Practice implementing algorithms
 
 ### Features:
+- [Accompanying theory notes](https://alramalho.notion.site/Understanding-RL-Theory-Notes-e8591990a19e4d31bd841d318cbd6e40) 📕
 - Minimal and Object Oriented code for simple (Semi Gradient Sarsa) and state of the art algorithms (PPO-Clip)
 - Understandable and intuitive logging via experience tracking 
 - Hyperparameter Tuning (in < 40 lines of code for all algorithms)*
@@ -142,12 +143,13 @@ Would open
 - [x] add logging
     - To csv
 - [x] explain folder structure
-- [x] explain experiment
+- [x] experiment manager
 - [x] add no test disclaimer
 - [x] separate plotting from main execution (use intermidiary csv)
 - [ ] vectorized environments. (Check `stable_baselines3/common/vec_env`)
 - [ ] unit tests to verify all algos work (take a look at `rl-baselines3-zoo/tests`)
 - [ ] Allow for video saving
+- [ ] Allow for model saving
 
 ### other improvements
 
