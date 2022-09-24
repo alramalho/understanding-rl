@@ -1,17 +1,27 @@
 <figure>
-  <img src="_imgs/img.png" style="width: 100%" alt="Minimal Pytorch Reinforcement Learning (RL) algorithms">
+  <img src="_imgs/img.png" style="width: 100%" alt="Understanding RL">
 </figure>
 
+<figure>
+    <p align="center">
+    <img src="_imgs/pong.gif" width="350" style="left: 50%" alt="Understanding RL">
+      <br/><span style="font-size: smaller">Environment PongNoFrameskip-v4</span>
+    </p>
+</figure>
 
 ## Goals of the repo:
 
-- Demystify RL algorithms by providing minimal, pytorch object-oriented implementations and it's accompanying pseudocode and explanation
-  - I also provide quick explanations on typical `Pytorch` tricky manipulations, like `.squeeze()` or `.detach()` (at the end of repo)
+- Demystify RL algorithms by providing minimal, pytorch object-oriented implementations and it's accompanying pseudocode
+  and explanation
+    - I also provide quick explanations on typical `Pytorch` tricky manipulations, like `.squeeze()` or `.detach()` (at
+      the end of repo)
 - Support my theory notes
 - Practice implementing algorithms
 
 ### Features:
-- [Accompanying theory notes](https://alramalho.notion.site/Understanding-RL-Theory-Notes-e8591990a19e4d31bd841d318cbd6e40) 📕
+
+- [Accompanying theory notes](https://alramalho.notion.site/Understanding-RL-Theory-Notes-e8591990a19e4d31bd841d318cbd6e40)
+  📕
 - Minimal and Object Oriented code for simple (Semi Gradient Sarsa) and state of the art algorithms (PPO-Clip)
 - Understandable and intuitive **logging** via experience tracking
 - Easy reward and loss **plotting**
@@ -60,13 +70,14 @@ python run.py --algo <algo> --env <env>
           └─results.csv >> CSV of Rewards and Loss
 ```
 
-For example running 
+For example running
 
 ```
 python run.py --algo ddqn --env CartPole-v1
 ```
 
-will yield 
+will yield
+
 ```
 ddqn
   └─logs
@@ -78,7 +89,8 @@ ddqn
 ```
 
 - Running again does not overwrite, but appends new experiments `<algo>/logs/<env>` folder
-- The files begin to be written as soon as the experiment starts. Hence interrupting via `CTRL`+`C` will still yield plottable results.
+- The files begin to be written as soon as the experiment starts. Hence interrupting via `CTRL`+`C` will still yield
+  plottable results.
 - You can also delete last experiment by running the same command with `-d` or `--delete` flag
 
 ### Tune / Optimize
@@ -109,7 +121,8 @@ python run.py --algo ddpg --env Pendulum-v1 --optimize --n-trials 100
 ```
 
 - You can cancel it with CTRL+C
-- For simplicity, all hyperparameter _suggestions_ are done in `core.optuna_create` method. I'll leave the tweaking around for you.
+- For simplicity, all hyperparameter _suggestions_ are done in `core.optuna_create` method. I'll leave the tweaking
+  around for you.
 
 ### Plot
 
@@ -118,6 +131,7 @@ Used for plotting losses and rewards
 ```
 python run.py --algo <algo> --env <env> --plot <experiment>
 ```
+
 Ex: `python run.py --algo ppo --env CarPole-v1 --plot experiment_6`
 
 Would open
@@ -129,9 +143,7 @@ Would open
 </figure>
 ![ddqn_pong_results.png](ddqn_pong_results.png)
 
-
 - `<experiment>` can be ommited and it will use latest experience for specified algorithm and environment.
-
 
 # TODO
 
@@ -166,13 +178,16 @@ pip install "gym[atari,accept-rom-license]"
 
 Be aware that this accepts the ROM license for you.
 
-
 ## `Pytorch` tricks
+
 - `.squeeze(...)`
-  - This "squeezes" dim=1 of the array. Useful for when you're working with slightly different tensor shapes. Ex: tensor of dims [32,1].squeeze() -> [32,]  
+    - This "squeezes" dim=1 of the array. Useful for when you're working with slightly different tensor shapes. Ex:
+      tensor of dims [32,1].squeeze() -> [32,]
 - `.unsqueeze(...)`
-  - Kind of the reverse of `.squeeze()`, as it adds in one dimension. Ex: tensor of dims [32,].unsqueeze(1) -> [32, 1]
+    - Kind of the reverse of `.squeeze()`, as it adds in one dimension. Ex: tensor of dims [32,].unsqueeze(1) -> [32, 1]
 - `.view(...)`
-  - Like `.unsqueeze()` but you could do weirder manipulations (change several dimensions). Ex tensor of shape [2,2].view(4,1) -> [4,1]
+    - Like `.unsqueeze()` but you could do weirder manipulations (change several dimensions). Ex tensor of shape [2,2]
+      .view(4,1) -> [4,1]
 - `detach()`
-  - Detaches tensor from gradient calculations. Useful when you want to make predicitons, without backpropagating. (Ex: DDQN target network)
+    - Detaches tensor from gradient calculations. Useful when you want to make predicitons, without backpropagating. (
+      Ex: DDQN target network)
